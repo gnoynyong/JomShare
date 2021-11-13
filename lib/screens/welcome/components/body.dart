@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:jomshare/components/roundbutton.dart';
 import 'package:jomshare/constants.dart';
 import 'package:jomshare/screens/welcome/components/background.dart';
@@ -12,29 +12,31 @@ class Body extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Text(
-        "WELCOME TO JOMSHARE",
-        style: TextStyle(fontWeight: FontWeight.bold,fontSize: 24),
+        "WELCOME TO ",
+        style: TextStyle(fontWeight: FontWeight.bold,fontSize: 40),
         ),
         Image.asset(
-          "assets/image/mainwelcome.jpg",
-          height:size.height*0.45,
+          "assets/image/default.png",
+          height:size.height*0.4,
           ),
         RoundButton(
           text: "LOGIN",
-          press: () {},
+          press: () {
+            Navigator.pushNamed(context, '/login');
+          },
           textColor: Colors.white,
-          bckcolor: primaryColor,
+          bckcolor: background,
         ) ,
         RoundButton(
           text: "SIGN UP",
-          press: (){},
+          press: (){
+          Navigator.pushNamed(context, '/register');
+          },
           textColor: Colors.black,
           bckcolor: lightpp,
-        )      
+        )
         ],
     ),
     );
   }
 }
-
-

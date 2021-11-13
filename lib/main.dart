@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:jomshare/screens/user%20authentication/createProfile.dart';
+import 'package:jomshare/screens/user%20authentication/forgetpassword.dart';
 import 'package:jomshare/screens/welcome/welcome_screen.dart';
+import 'package:jomshare/screens/splash/splash.dart';
+import 'package:jomshare/screens/home/home.dart';
+import 'package:jomshare/screens/user authentication/login.dart';
+import 'package:jomshare/screens/user authentication/register.dart';
+
+
+
+
 
 void main() {
-  runApp(const MyApp());
+  runApp( MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+
 
   // This widget is the root of your application.
   @override
@@ -14,8 +24,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Jom Share',
       debugShowCheckedModeBanner: false,
-      home: WelcomeScreen(),
-    );
+     initialRoute: '/',
+
+routes: {
+  '/': (context)=> splash(),
+  '/login': (context)=> login(),
+  '/register': (context) => signUpScreen(),
+  '/home': (context)=>Home(),
+  '/forgetpass': (context)=>forgetpassword(),
+  '/register/createProfile': (context)=>createProfile(),
+
+});
   }
 }
-
