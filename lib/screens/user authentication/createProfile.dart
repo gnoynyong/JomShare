@@ -53,6 +53,7 @@ String ?validate (String ?value)
           avatar(),
           SizedBox(height: 20,),
           TextFormField(
+             keyboardType: TextInputType.name,
             validator: validate,
 
             decoration: InputDecoration(
@@ -112,8 +113,45 @@ String ?validate (String ?value)
             ),
 
           ),
+           SizedBox(height: 10,),
+          TextFormField(
+            keyboardType: TextInputType.numberWithOptions(
+              decimal: false,
+              signed: false,
+
+            ),
+            validator: validate,
+
+            decoration: InputDecoration(
+              filled: true,
+
+              fillColor: Colors.white,
+              hintStyle: TextStyle(
+                color: Colors.grey
+              ),
+              hintText: 'Age',
+              prefixIcon: Icon(Icons.calendar_today
+              ,size: 30,color: Colors.black),
+              focusedBorder:OutlineInputBorder(
+
+
+                            borderSide:BorderSide(color: Colors.blue,width: 1)
+                          ),
+                          enabledBorder:OutlineInputBorder(
+
+                            borderSide:BorderSide(color: Colors.blue,width: 1)
+                          ),
+                          errorBorder: OutlineInputBorder(
+
+                            borderSide:BorderSide(color: Colors.red,width: 1)
+                          )
+            ),
+
+          ),
+
           SizedBox(height: 10,),
           TextFormField(
+            keyboardType: TextInputType.phone,
 
             validator: validate,
             decoration: InputDecoration(
@@ -144,6 +182,7 @@ String ?validate (String ?value)
           ),
           SizedBox(height: 10,),
           TextFormField(
+            keyboardType: TextInputType.multiline,
             validator: validate,
 
             decoration: InputDecoration(
@@ -174,6 +213,7 @@ String ?validate (String ?value)
           ),
           SizedBox(height: 10,),
           TextFormField(
+             keyboardType: TextInputType.multiline,
             validator: validate,
 
             decoration: InputDecoration(
@@ -217,9 +257,9 @@ String ?validate (String ?value)
               child: Row(
                 children: [
 
-                  Icon(Icons.calendar_today,size: 30,),
+                  Icon(Icons.male,size: 30,),
                   SizedBox(width: 8,),
-                  Text('DOB',style: TextStyle(fontSize:20,color:Colors.black,fontWeight: FontWeight.bold)),
+                  Text('Gender',style: TextStyle(fontSize:20,color:Colors.black,fontWeight: FontWeight.bold)),
                   SizedBox(width: 20,),
                   DropdownButton(
                     value:_gender,
