@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-
+import 'package:jomshare/constants.dart';
+import 'package:flutter/widgets.dart';
+import 'package:jomshare/screens/Manage/body_request.dart';
 class manageHome extends StatefulWidget {
 
 
@@ -7,21 +9,57 @@ class manageHome extends StatefulWidget {
   _manageHomeState createState() => _manageHomeState();
 }
 
-class _manageHomeState extends State<manageHome> {
+class _manageHomeState extends State<manageHome>with SingleTickerProviderStateMixin {
+TabController ?_controller;
+  int _selectedIndex = 0;
+void initState() {
+    _controller = new TabController(length: 2, vsync: this);
+
+    _controller!.addListener(() {
+      setState(() {
+        _selectedIndex = _controller!.index;
+      });
+      // Do whatever you want based on the tab index
+    });
+
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
 
-      appBar: AppBar(
-        title: Text('Manage Carpools'),
-        bottom: TabBar(
-tabs: [
-Tab(
-text: 'Requested',
-),
-Tab(text: 'Offered',)
-],
+    return DefaultTabController(
+      length: 2,
+
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: lightpp,
+
+          title: Text('Manage My Carpools') ,
+          automaticallyImplyLeading: false,
+          bottom: TabBar(
+            controller: _controller,
+            labelColor: Colors.white,
+            indicatorColor: background,
+            tabs: [
+              Tab(
+                child:Text('Requested\nCarpools',style: TextStyle(color:background,fontSize: 15,fontWeight: FontWeight.bold),),
+              ),
+             Tab(
+                child:Text('Offered\nCarpools',style: TextStyle(color:background,fontSize: 15,fontWeight: FontWeight.bold),),
+              ),
+            ],
+          ),
         ),
+        body: TabBarView(
+        controller: _controller,
+        children: <Widget>[
+            bodyRequest(),
+          Container(
+
+          )
+
+        ],
+      ),
       ),
     );
   }

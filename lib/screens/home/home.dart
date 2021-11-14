@@ -12,9 +12,11 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 int _currentIndex = 0;
-  final List _children = [login(),signUpScreen(),manageHome()];
+  final List _children = [manageHome(),manageHome(),manageHome(),manageHome()];
+
   Widget build(BuildContext context) {
     return Scaffold(
+      body: _children.elementAt(_currentIndex),
       bottomNavigationBar: SingleChildScrollView(
         child: SizedBox(
           height: 60,
@@ -28,6 +30,7 @@ int _currentIndex = 0;
                 .textTheme
                 .copyWith(caption: new TextStyle(color: Colors.yellow))),
             child: BottomNavigationBar(
+
               elevation: 0,
 
               onTap: (index){
