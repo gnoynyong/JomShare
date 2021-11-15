@@ -6,6 +6,7 @@ import 'package:jomshare/screens/offerpool/OfferPool.dart';
 import 'package:jomshare/screens/user%20authentication/login.dart';
 import 'package:jomshare/screens/user%20authentication/register.dart';
 import 'package:jomshare/constants.dart';
+import 'package:jomshare/screens/Profile/SettingsUI.dart';
 class Home extends StatefulWidget {
 
 
@@ -15,7 +16,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 int _currentIndex = 0;
-  final List _children = [Pool(),manageHome(),ChatPage(),manageHome()];
+  final List _children = [Pool(),manageHome(),ChatPage(),SettingsUI()];
 
   Widget build(BuildContext context) {
     return Scaffold(
