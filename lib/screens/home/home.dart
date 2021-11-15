@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jomshare/screens/Manage/manageHome.dart';
+import 'package:jomshare/screens/contact/ChatPage.dart';
+import 'package:jomshare/screens/home/Pool.dart';
+import 'package:jomshare/screens/offerpool/OfferPool.dart';
 import 'package:jomshare/screens/user%20authentication/login.dart';
 import 'package:jomshare/screens/user%20authentication/register.dart';
 import 'package:jomshare/constants.dart';
@@ -12,7 +15,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 int _currentIndex = 0;
-  final List _children = [manageHome(),manageHome(),manageHome(),manageHome()];
+  final List _children = [Pool(),manageHome(),ChatPage(),manageHome()];
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,7 +26,7 @@ int _currentIndex = 0;
           child: Theme(
             data: Theme.of(context).copyWith(
             // sets the background color of the `BottomNavigationBar`
-            canvasColor: lightpp,
+            canvasColor: Colors.white,
 
             textTheme: Theme
                 .of(context)
@@ -42,21 +45,21 @@ int _currentIndex = 0;
 
              items: [
                BottomNavigationBarItem(
-                 icon: Icon(Icons.search,color: Colors.white,),
-                 title: Text('Find Carpool',style: TextStyle(color: Colors.white)),
+                 icon: Icon(Icons.home,color: darkblue,),
+                 title: Text('Home',style: TextStyle(color: darkblue)),
+               ),
+              
+               BottomNavigationBarItem(
+                 icon: Icon(Icons.navigation_outlined,color: darkblue),
+                 title: Text('Trips',style: TextStyle(color: darkblue))
                ),
                BottomNavigationBarItem(
-                 icon:  Icon(Icons.local_taxi,color: Colors.white),
-                 title: Text('Offer Carpool',style: TextStyle(color: Colors.white)),
+                 icon:  Icon(Icons.chat,color: darkblue),
+                 title: Text('Chat',style: TextStyle(color: darkblue)),
                ),
                BottomNavigationBarItem(
-                 icon: Icon(Icons.navigation_outlined,color: Colors.white),
-                 title: Text('Manage carpools',style: TextStyle(color: Colors.white))
-               ),
-
-               BottomNavigationBarItem(
-                 icon: Icon(Icons.more_vert , color: Colors.white),
-                 title: Text('More',style: TextStyle(color: Colors.white,))
+                 icon: Icon(Icons.more_vert , color: darkblue),
+                 title: Text('More',style: TextStyle(color: darkblue,))
                )
              ],
                ),
