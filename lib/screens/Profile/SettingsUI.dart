@@ -111,6 +111,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
               buildTextField("Password", "********", true),
               buildTextField("Location", "Kulai, Johor", false),
               buildTextField("Phone Number", "019-7370225", false),
+              TextButton(
+                child: Text("Delete Account"),
+                onPressed: (){},
+                style: TextButton.styleFrom(primary: Colors.white,backgroundColor: Colors.red),
+                ),
               SizedBox(
                 height: 35,
               ),
