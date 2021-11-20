@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1060332628721",
+    "project_id": "jomshare-1a269",
+    "storage_bucket": "jomshare-1a269.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1060332628721:android:7d167d1b8e5785ee405750",
+        "android_client_info": {
+          "package_name": "com.example.jomshare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1060332628721-sn31eoffkpndu269nficp9g65p3nh20l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArCE3l11qOOIODaBEx8qiT87YR7AdFR-o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1060332628721-sn31eoffkpndu269nficp9g65p3nh20l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
