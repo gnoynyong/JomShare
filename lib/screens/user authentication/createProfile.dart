@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:jomshare/constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jomshare/screens/user%20authentication/license.dart';
+import 'package:image_cropper/image_cropper.dart';
 class createProfile extends StatefulWidget {
 
 
@@ -12,6 +13,9 @@ class createProfile extends StatefulWidget {
 }
 
 class _createProfileState extends State<createProfile> {
+  File ?_selectedFile;
+  bool  _inprocess=true;
+  bool _oriImage=true;
   final GlobalKey<FormState> _profileform = GlobalKey<FormState>();
   var password;
 bool ?L1,L2,L3,L4,L5;
@@ -112,6 +116,41 @@ String ?validate (String ?value)
                           )
             ),
 
+          ),SizedBox(height: 10,),
+          Container(
+
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.blue,width: 1)
+
+              ,
+              color: Colors.white,
+
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+              child: Row(
+                children: [
+
+                  Icon(Icons.male,size: 30,),
+                  SizedBox(width: 8,),
+                  Text('Gender',style: TextStyle(fontSize:15,color:Colors.black,fontWeight: FontWeight.bold)),
+                  SizedBox(width: 20,),
+                  DropdownButton(
+                    value:_gender,
+                    items: [
+                      DropdownMenuItem(child: Text('Male',style: TextStyle(fontSize: 20),),value: 'Male',),
+                      DropdownMenuItem(child: Text('Female',style: TextStyle(fontSize: 20)),value: 'Female',),
+                    ],
+                    onChanged: (String ?value){
+                      setState(() {
+                        _gender=value;
+                      });
+                    },
+                  )
+
+                ],
+              ),
+            ),
           ),
            SizedBox(height: 10,),
           TextFormField(
@@ -242,42 +281,7 @@ String ?validate (String ?value)
             ),
 
           ),
-          SizedBox(height: 10,),
-          Container(
 
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.blue,width: 1)
-
-              ,
-              color: Colors.white,
-
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child: Row(
-                children: [
-
-                  Icon(Icons.male,size: 30,),
-                  SizedBox(width: 8,),
-                  Text('Gender',style: TextStyle(fontSize:20,color:Colors.black,fontWeight: FontWeight.bold)),
-                  SizedBox(width: 20,),
-                  DropdownButton(
-                    value:_gender,
-                    items: [
-                      DropdownMenuItem(child: Text('Male',style: TextStyle(fontSize: 20),),value: 'Male',),
-                      DropdownMenuItem(child: Text('Female',style: TextStyle(fontSize: 20)),value: 'Female',),
-                    ],
-                    onChanged: (String ?value){
-                      setState(() {
-                        _gender=value;
-                      });
-                    },
-                  )
-
-                ],
-              ),
-            ),
-          ),
           SizedBox(height: 20,),
            ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -288,48 +292,158 @@ String ?validate (String ?value)
         primary: Colors.blue[900]
     ),
                       onPressed: (){
-                          if(_profileform.currentState!.validate())
+                          if (_selectedFile!=null)
                           {
-                              Navigator.pushNamed(context, '/login');
+if(_profileform.currentState!.validate())
+                          {
+                              Navigator.pushNamed(context, '/drivingProfile');
+                          }
+                          }
+                          else
+                          {
+                            showAlert(context);
+
                           }
 
+
                       },
-                      child: Text('Complete',
+                      child: Text('Next',
                       style: TextStyle(
                         fontSize:20
                       ),
-                      ))
+                      )),
+
         ],
       ),
     ),
     ))
     );
   }
+void showAlert(BuildContext context) {
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Incomplete Profile Picture'),
+                content: Text("Please upload your profile picture before proceeding"),
+                actions: [
+                  TextButton(onPressed: (){Navigator.pop(context);}, child: Text('Ok'))
+                ],
+              ));
+    }
+getImage (ImageSource source) async
+{
+   final ImagePicker _picker = ImagePicker();
+  XFile? image=await _picker.pickImage(source: source);
+  if (image!=null)
+  {
+  File? cropped=await ImageCropper.cropImage(sourcePath: image.path
+  ,aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1)
+  ,compressQuality:100,
+  cropStyle: CropStyle.circle,
+  maxHeight: 700,
+  maxWidth:700,
+  compressFormat:ImageCompressFormat.jpg,
+  androidUiSettings:AndroidUiSettings(
+    toolbarColor: Colors.blue,
+    toolbarTitle:"Profile Image Cropper",
+
+    backgroundColor:Colors.white,
+  )
+  );
+  this.setState(() {
+    _selectedFile=cropped;
+    _oriImage=false;
+    _inprocess=false;
+  });
+  }
+  else
+  {
+    this.setState(() {
+      _inprocess=false;
+    });
+  }
+
+}
+Widget getImageWidget ()
+{
+  if (_selectedFile==null)
+  {
+     return ClipOval(
+
+       child: Image.asset('assets/image/avatar.jfif',fit: BoxFit.cover,scale: 1.3,)
+     )
+     ;
+  }
+  else
+  {
+    return ClipOval(
+      child: Image.file(_selectedFile!,fit: BoxFit.cover,scale: 1.3,),
+    );
+  }
+}
   Widget avatar ()
 {
 return Stack(
       children: [
 
-        Center(
-          child: CircleAvatar(
-              radius: 80,
-          backgroundImage: AssetImage('assets/image/avatar.jfif')
-          ,
 
-            ),
-        )
+          getImageWidget()
           ,
           Positioned(
-            bottom: 20,
-            right: 40,
+            bottom: 10,
+            right: 10,
             child: InkWell(
               onTap: (){
+                showModalBottomSheet(
+                  context: context,
+                   builder: (BuildContext context)
+                   {
+                        return Container(
+                       height: 100,
+                       color: Colors.lightBlue[400],
+                       child: Row(
+                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                         children: [
+                           Column(
+                             children: [
+                               IconButton(
+                             onPressed: (){
+                               getImage(ImageSource.camera);
+                               Navigator.pop(context);
 
+                             },
+                              icon: Icon(Icons.camera_alt,)),
+                              Text('Choose From Camera')
+                             ],
+                           )
+                           ,
+                                Column(
+                             children: [
+                               IconButton(
+                             onPressed: (){
+                               getImage(ImageSource.gallery);
+                               Navigator.pop(context);
+
+                             },
+                              icon: Icon(Icons.file_copy)),
+                              Text('Choose From Gallery')
+                             ],
+                           ),
+
+
+                         ],
+
+                       ));
+
+
+
+                   }
+                   );
               },
               child: Icon(
                   Icons.camera_alt,
                   color: Colors.teal,
-                  size: 28,
+                  size: 40,
 
               ),
             )
