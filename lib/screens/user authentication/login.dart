@@ -4,6 +4,7 @@ import 'package:jomshare/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:jomshare/screens/home/home.dart';
 import 'package:jomshare/screens/user%20authentication/forgetpassword.dart';
+import 'package:jomshare/services/auth.dart';
 class login extends StatefulWidget
 {
   State <login> createState() =>loginState();
@@ -11,8 +12,10 @@ class login extends StatefulWidget
 
 class loginState extends State <login>
 {
+  TextEditingController email=TextEditingController();
+  TextEditingController pass=TextEditingController();
 final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
-
+final AuthService _auth = AuthService();
 String ?validateEmail (String ?value)
 {
   if (value!.isEmpty)
@@ -63,6 +66,7 @@ Padding(
 
         padding: const EdgeInsets.symmetric(horizontal: 40),
         child: TextFormField(
+          controller: email,
           validator: validateEmail,
           decoration: InputDecoration(
             filled: true,
@@ -96,6 +100,7 @@ Padding(
 
         padding: const EdgeInsets.symmetric(horizontal: 40),
         child: TextFormField(
+          controller: pass,
           obscureText: true,
           validator: validatePassword,
           decoration: InputDecoration(
@@ -146,7 +151,7 @@ Padding(
         ),
         primary: Colors.blue[900]
     ),
-           onPressed: (){
+           onPressed: () async {
                           if(!_formkey.currentState!.validate())
                           {
 
@@ -154,7 +159,17 @@ Padding(
                           }
                           else
                           {
-                            Navigator.pushNamed(context, '/home');
+                            dynamic result = await _auth.signInWithEmailAndPassword(email.text, pass.text);
+                            if (result==null)
+                            {
+                              showAlert(context);
+
+
+                            }
+                            else
+                            {
+                              Navigator.pushNamed(context, '/home');
+                            }
                           }
 
 
@@ -182,4 +197,15 @@ Padding(
 ),
     );
   }
+  void showAlert(BuildContext context) {
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Login Error'),
+                content: Text("Invalid Credentials"),
+                actions: [
+                  TextButton(onPressed: (){Navigator.pop(context);}, child: Text('Ok'))
+                ],
+              ));
+    }
 }

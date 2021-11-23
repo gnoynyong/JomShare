@@ -17,7 +17,13 @@ class _createProfileState extends State<createProfile> {
   bool  _inprocess=true;
   bool _oriImage=true;
   final GlobalKey<FormState> _profileform = GlobalKey<FormState>();
-  var password;
+
+ final TextEditingController _name = TextEditingController();
+  final TextEditingController _icno = TextEditingController();
+   final TextEditingController _age = TextEditingController();
+    final TextEditingController _phone = TextEditingController();
+     final TextEditingController _address = TextEditingController();
+      final TextEditingController _occupation = TextEditingController();
 bool ?L1,L2,L3,L4,L5;
 
 String ?_gender='Male';
@@ -30,6 +36,7 @@ String ?validate (String ?value)
 
 }
   Widget build(BuildContext context) {
+    final arguments=ModalRoute.of(context)!.settings.arguments as Map;
     return Scaffold(
        backgroundColor: primaryColor,
     appBar: AppBar(
@@ -57,6 +64,7 @@ String ?validate (String ?value)
           avatar(),
           SizedBox(height: 20,),
           TextFormField(
+            controller: _name,
              keyboardType: TextInputType.name,
             validator: validate,
 
@@ -89,6 +97,7 @@ String ?validate (String ?value)
           ),
           SizedBox(height: 10,),
           TextFormField(
+            controller: _icno,
             validator: validate,
 
             decoration: InputDecoration(
@@ -154,6 +163,7 @@ String ?validate (String ?value)
           ),
            SizedBox(height: 10,),
           TextFormField(
+            controller: _age,
             keyboardType: TextInputType.numberWithOptions(
               decimal: false,
               signed: false,
@@ -190,6 +200,7 @@ String ?validate (String ?value)
 
           SizedBox(height: 10,),
           TextFormField(
+            controller: _phone,
             keyboardType: TextInputType.phone,
 
             validator: validate,
@@ -221,6 +232,7 @@ String ?validate (String ?value)
           ),
           SizedBox(height: 10,),
           TextFormField(
+            controller: _address,
             keyboardType: TextInputType.multiline,
             validator: validate,
 
@@ -252,6 +264,7 @@ String ?validate (String ?value)
           ),
           SizedBox(height: 10,),
           TextFormField(
+            controller: _occupation,
              keyboardType: TextInputType.multiline,
             validator: validate,
 
@@ -296,7 +309,12 @@ String ?validate (String ?value)
                           {
 if(_profileform.currentState!.validate())
                           {
-                              Navigator.pushNamed(context, '/drivingProfile');
+
+                              Navigator.pushNamed(context, '/drivingProfile'
+                              ,arguments: {'email':arguments['email'],'pass':arguments['pass']
+                              ,'name':_name.text,'ic':_icno.text,'gender':_gender,'age':_age.text
+                              ,'phone':_phone.text,'address':_address.text,'occupation':_occupation.text
+                              ,'picture':_selectedFile});
                           }
                           }
                           else
@@ -351,7 +369,7 @@ getImage (ImageSource source) async
   )
   );
   this.setState(() {
-    _selectedFile=cropped;
+    _selectedFile=cropped ;
     _oriImage=false;
     _inprocess=false;
   });

@@ -1,6 +1,14 @@
+import 'package:jomshare/services/auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:jomshare/constants.dart';
+import 'package:jomshare/services/userdatabase.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 class license extends StatefulWidget {
 
 
@@ -11,10 +19,15 @@ enum option {Yes,No}
 class _licenseState extends State<license> {
   @override
   List <dynamic> license=['A','A1','D','DA'];
-  List <dynamic>selection=[];
+  var selection;
   option ?LicenseOption=option.No;
   option ?CarOption=option.No;
+  bool licenseResult=false;
+  bool carResult=false;
+  String licenseType="";
+  String uid="";
 
+final AuthService _auth = AuthService();
   Widget vehicleOption ()
   {
     if (LicenseOption==option.Yes)
@@ -64,6 +77,7 @@ class _licenseState extends State<license> {
   }
   Widget boxheight ()
   {
+
     if (LicenseOption==option.No)
     {
       return SizedBox(height: 100,);
@@ -86,9 +100,8 @@ class _licenseState extends State<license> {
       child: GFMultiSelect(
         items: license,
         onSelect: ( value) {
-          selection.clear();
-          selection.add(value);
 
+          selection=value;
 
         },
         dropdownTitleTileText: 'Types of driving license',
@@ -130,11 +143,15 @@ class _licenseState extends State<license> {
   }
 
   Widget build(BuildContext context) {
+
+    final arguments=ModalRoute.of(context)!.settings.arguments as Map;
+    String email=arguments['email'];
+    String pass=arguments['pass'];
   return Scaffold(
        backgroundColor: primaryColor,
     appBar: AppBar(
       centerTitle: true,
-      title: Text('Driving Profile',),
+      title: Text('Driving Profile'),
       elevation: 0,
       backgroundColor: lightpp,
       leading: IconButton(
@@ -182,6 +199,8 @@ class _licenseState extends State<license> {
          ),
 
         licenseList(),
+
+
         vehicleOption(),
         boxheight(),
         Center(
@@ -193,12 +212,51 @@ class _licenseState extends State<license> {
         ),
         primary: Colors.blue[900]
     ),
-                        onPressed: (){
-                            Navigator.pushNamed(context, '/login');
+                        onPressed: () async {
+                            LicenseOption==option.No?licenseResult=false:licenseResult=true;
+                            dynamic result = await _auth.registerWithEmailAndPassword(arguments['email'],arguments['pass']);
+                            licenseType="";
+                            if (licenseResult)
+                            {
+
+                              for (int i=0;i<selection.length;i++)
+                              {
+                                licenseType=licenseType+"/"+selection[i].toString();
+
+                              }
+                            }
+
+                            if (result==null)
+                            {
+                              showAlert(context);
+
+
+                            }
+                            else
+                            {
+                              File image=arguments['picture'];
+                              dynamic result = await _auth.signInWithEmailAndPassword(arguments['email'],arguments['pass']);
+                              final user=UserDataBaseService(uid:_auth.getUID() );
+
+
+                            String url=await user.uploadImageToFirebase(context, image);
+                            print(url);
+                             await user.addUser(arguments['name'], arguments['ic'], arguments['gender'], arguments['age'], arguments['phone'], arguments['address'], arguments['occupation']
+                              ,licenseResult,carResult,licenseType,url);
+                              CircularProgressIndicator;
+                              Navigator.pushNamed(context, '/login');
+
+
+
+
+                            }
+
+
+
 
 
                         },
-                        child: Text('Complete Registration',
+                        child: Text("Complete registration",
                         style: TextStyle(
                           fontSize:20
                         ),
@@ -216,4 +274,15 @@ class _licenseState extends State<license> {
 
 
   }
+  void showAlert(BuildContext context) {
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Registration Error'),
+                content: Text("This email has been registered.Please try with other email"),
+                actions: [
+                  TextButton(onPressed: (){Navigator.pushNamed(context, '/login');;}, child: Text('Ok'))
+                ],
+              ));
+    }
 }

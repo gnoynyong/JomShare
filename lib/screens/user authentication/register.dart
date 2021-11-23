@@ -12,6 +12,7 @@ class signUpScreen extends StatefulWidget {
 
 class _signUpScreenState  extends State<signUpScreen> {
   @override
+  final TextEditingController _email = TextEditingController();
   final TextEditingController _pass = TextEditingController();
   final TextEditingController _confirmPass = TextEditingController();
   final GlobalKey<FormState> _form = GlobalKey<FormState>();
@@ -67,6 +68,7 @@ Widget build (BuildContext context)
                     ),),
                     SizedBox(height: 10,),
                     TextFormField(
+                      controller: _email,
 
                       validator: (value)
                       {
@@ -189,7 +191,7 @@ Widget build (BuildContext context)
                       onPressed: (){
                           if(_form.currentState!.validate())
                           {
-                              Navigator.pushNamed(context, '/register/createProfile');
+                              Navigator.pushNamed(context, '/register/createProfile',arguments:{'email':_email.text,'pass':_pass.text});
                           }
 
                       },
