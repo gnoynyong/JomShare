@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:jomshare/screens/Manage/manageHome.dart';
 import 'package:jomshare/screens/contact/ChatPage.dart';
 import 'package:jomshare/screens/home/Pool.dart';
-import 'package:jomshare/screens/home/PoolPage.dart';
+import 'package:jomshare/screens/home/Poolpage.dart';
+import 'package:jomshare/screens/offerpool/OfferCarPool.dart';
 import 'package:jomshare/screens/user%20authentication/login.dart';
 import 'package:jomshare/screens/user%20authentication/register.dart';
 import 'package:jomshare/constants.dart';
@@ -16,7 +17,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 int _currentIndex = 0;
-  final List _children = [PoolPage(),manageHome(),ChatPage(),SettingsUI()];
+  final List _children = [Poolpage(),manageHome(),ChatPage(),SettingsUI()];
 
   Widget build(BuildContext context) {
     return Scaffold(
