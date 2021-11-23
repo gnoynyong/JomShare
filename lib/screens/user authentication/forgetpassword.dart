@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jomshare/constants.dart';
+import 'package:jomshare/services/auth.dart';
 class forgetpassword extends StatefulWidget {
 
 
@@ -8,7 +9,8 @@ class forgetpassword extends StatefulWidget {
 }
 
 class _forgetpasswordState extends State<forgetpassword> {
-
+final AuthService _auth = AuthService();
+TextEditingController email=TextEditingController();
 String ?validateEmail (String ?value)
 {
   if (value!.isEmpty)
@@ -58,6 +60,7 @@ String ?validateEmail (String ?value)
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 30,vertical: 5),
                       child: TextFormField(
+                        controller: email,
 
 
                         textAlignVertical: TextAlignVertical.top,
@@ -101,6 +104,8 @@ String ?validateEmail (String ?value)
                 onPressed: (){
                  if(_emailverify.currentState!.validate())
                             {
+                              _auth.resetPassword(email.text);
+
 
                               Navigator.pushNamed(context, '/login');
                             }
