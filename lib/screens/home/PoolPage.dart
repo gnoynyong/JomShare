@@ -589,9 +589,9 @@ class _PoolpageState extends State<Poolpage> {
                                   Finddrop= Marker(
                                     markerId: MarkerId('dest'),
                                     position: result.destination.coords!).position;
-                                    print('offerpickup:' );
+                                    print('findpickup:' );
                                     print(Findpickup);
-                                     print('droppickup:' );
+                                     print('findpickup:' );
                                     print(Finddrop);
                               markers.addAll([
                                 Marker(
