@@ -38,12 +38,16 @@ class Poolpage extends StatefulWidget {
 class _PoolpageState extends State<Poolpage> {
   List <dynamic> Repeated_Day=['MON','TUE','WED','THU','FRI','SAT','SUN',];
   String repatedDay="Repeated Days";
-  var type;
+  var type,selectedDay;
   List<bool> _selections = [true, false];
   final format = DateFormat("yyyy-MM-dd HH:mm");
   late final GoogleMapController _controller;
   bool pickup_is_Tap=false;
   bool drop_is_Tap=false;
+  String ?cartype,seat;
+  TextEditingController plateno = TextEditingController();
+  TextEditingController price = TextEditingController();
+  TextEditingController DT = TextEditingController();
   TextEditingController OpickupCtrl = TextEditingController();
 
   TextEditingController OdropCtrl = TextEditingController();
@@ -66,6 +70,7 @@ class _PoolpageState extends State<Poolpage> {
     countryCode: 'MY',
   );
 
+
   Widget dropdown ()
   {
     return GFMultiSelect(
@@ -73,7 +78,7 @@ class _PoolpageState extends State<Poolpage> {
 
         items: Repeated_Day,
         onSelect: (value) {
-          type=value;
+          selectedDay=value;
         },
         dropdownTitleTileText: 'Repeted Days',
         dropdownTitleTileColor: Colors.grey[200],
@@ -166,7 +171,7 @@ class _PoolpageState extends State<Poolpage> {
               width: MediaQuery.of(context).size.width,
               child:GoogleMap(
               compassEnabled: true,
-              padding: EdgeInsets.only(top: 30),
+              padding: EdgeInsets.fromLTRB(0, 50, 10, 0),
 
               myLocationEnabled: true,
               myLocationButtonEnabled: true,
@@ -283,6 +288,7 @@ class _PoolpageState extends State<Poolpage> {
 
   Widget OfferSearchBox ()
   {
+
     return RouteSearchBox(
       originCtrl: OpickupCtrl,
       destinationCtrl: OdropCtrl,
@@ -300,7 +306,9 @@ class _PoolpageState extends State<Poolpage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Flexible(
-                                child: TextField(
+                                child: TextFormField(
+
+
 
 
                                   controller: OpickupCtrl,
@@ -324,6 +332,7 @@ class _PoolpageState extends State<Poolpage> {
                                 ),
                                 Flexible(
                                 child: TextFormField(
+
                                   controller: OdropCtrl,
                                   onTap: () => showDialog(
                             context: context,
@@ -351,6 +360,9 @@ class _PoolpageState extends State<Poolpage> {
                         children: [
                             Flexible(
                             child: DateTimeField(
+
+
+                              controller: DT,
                       decoration: InputDecoration(icon: Icon(Icons.event), hintText: 'Date Time',),
 
                       format: format,
@@ -375,6 +387,7 @@ class _PoolpageState extends State<Poolpage> {
                             ),
                             Flexible(
                               child: DropdownButtonFormField<String>(
+
                               decoration: InputDecoration(
                               icon: Icon(Icons.people),
                               ),
@@ -385,7 +398,14 @@ class _PoolpageState extends State<Poolpage> {
                               child: new Text(value),
                             );
                               }).toList(),
-                            onChanged: (_) {},
+                            onChanged: (value) {
+                              setState(() {
+                                seat=value;
+
+                              });
+
+
+                            },
                             ),
                               ),
                         ],
@@ -398,6 +418,7 @@ class _PoolpageState extends State<Poolpage> {
                         children: [
                           Flexible(
                               child: DropdownButtonFormField<String>(
+
                               decoration: InputDecoration(
                               icon: Icon(Icons.directions_car),
                               ),
@@ -409,7 +430,12 @@ class _PoolpageState extends State<Poolpage> {
 
                             );
                               }).toList(),
-                            onChanged: (_) {},
+                            onChanged: (value) {
+                              setState(() {
+                                cartype=value;
+                              });
+
+                            },
                             ),
                               ),
 
@@ -417,6 +443,7 @@ class _PoolpageState extends State<Poolpage> {
 
                             Flexible(
                               child: DropdownButtonFormField<String>(
+
                               decoration: InputDecoration(
                               icon: Icon(Icons.merge_type),
                               ),
@@ -439,6 +466,41 @@ class _PoolpageState extends State<Poolpage> {
                         ],
                       ),
                         ),
+                        Flexible(
+                          child: Row(
+                            children: [
+                              Flexible(child: TextFormField(
+
+                                controller: plateno,
+
+                                decoration: InputDecoration(
+
+                                  icon: Icon(Icons.directions_car),
+                                  labelText: 'Plate No'
+
+                                )
+
+                              )),
+                              Flexible(child: TextFormField(
+
+                                controller: price,
+                                keyboardType: TextInputType.numberWithOptions(
+                                  signed: false,
+                                  decimal:true,
+                                ),
+
+                                decoration: InputDecoration(
+
+                                  icon: Icon(Icons.attach_money),
+                                  labelText: 'Price (RM)'
+
+                                )
+
+                              )),
+                            ],
+                          )
+                        )
+                        ,
                         SizedBox(height: 10,),
 
 
@@ -452,6 +514,25 @@ class _PoolpageState extends State<Poolpage> {
                               child: SmallRoundButton(
                                 text: "Offer Pool",
                                 press: () async{
+                                  if (OpickupCtrl.text==''||OdropCtrl.text==''||DT.text==''||seat==null||cartype==null||type==null
+                                  ||plateno.text==''||price.text=='')
+                                  {
+
+
+                                     showDialog(
+                                            context: context,
+                                           builder: (context) => AlertDialog(
+                                                title: Text('Incomplete Fields'),
+                                          content: Text("Please makesure all fields for offerring carpool are filled"),
+                                         actions: [
+                                              TextButton(onPressed: (){Navigator.pop(context);}, child: Text('Ok'))
+                                                  ],
+              ));
+
+                                  }
+                                  else{
+
+
 
                                   print(OpickupCtrl.text);
                                    try {
@@ -493,6 +574,7 @@ class _PoolpageState extends State<Poolpage> {
                             } catch (e) {
                               print(e);
                             }
+                                  }
 
 
 
@@ -578,7 +660,24 @@ class _PoolpageState extends State<Poolpage> {
                             child: new RaisedButton(
                 child: const Text('Find Pool'),
                 onPressed: () async{
-                  print(FpickupCtrl.text);
+                  if (FpickupCtrl.text==''||FdropCtrl.text=='')
+                                  {
+
+                                     showDialog(
+                                            context: context,
+                                           builder: (context) => AlertDialog(
+                                                title: Text('Incomplete Fields'),
+                                          content: Text("Please makesure all fields for finding carpool are filled"),
+                                         actions: [
+                                              TextButton(onPressed: (){Navigator.pop(context);}, child: Text('Ok'))
+                                                  ],
+              ));
+
+                                  }
+                    else
+                    {
+
+
                                    try {
                               final result = await getDirections();
                               markers.clear();
@@ -618,6 +717,7 @@ class _PoolpageState extends State<Poolpage> {
                             } catch (e) {
                               print(e);
                             }
+                    }
 
 
                 },
