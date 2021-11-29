@@ -82,5 +82,16 @@ CollectionReference user = FirebaseFirestore.instance.collection('user');
 
 
   }
+  Future <void> addCarpoolToUser(String carpoolId) async
+  {
+    user.doc(uid).update(
+      {
+          'Offered carpools':FieldValue.arrayUnion([carpoolId]),
+      }
+    ).then((value) => print("Offer carpools added to user"))
+          .catchError((error) => print("Failed to add carpool into user: $error"));
+
+
+  }
 
 }
