@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jomshare/constants.dart';
 import 'package:flutter/widgets.dart';
+import 'package:jomshare/screens/Manage/OfferedBody.dart';
 import 'package:jomshare/screens/Manage/body_request.dart';
 class manageHome extends StatefulWidget {
 
@@ -54,9 +55,7 @@ void initState() {
         controller: _controller,
         children: <Widget>[
             bodyRequest(),
-          Container(
-
-          )
+            OfferedBody(),
 
         ],
       ),

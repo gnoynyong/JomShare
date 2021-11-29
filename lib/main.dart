@@ -8,6 +8,8 @@ import 'package:jomshare/screens/home/home.dart';
 import 'package:jomshare/screens/user authentication/login.dart';
 import 'package:jomshare/screens/user authentication/register.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:jomshare/services/auth.dart';
+import 'package:provider/provider.dart';
 
 
 
@@ -25,20 +27,26 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Jom Share',
-      debugShowCheckedModeBanner: false,
-     initialRoute: '/',
-
-routes: {
-  '/': (context)=> splash(),
-  '/login': (context)=> login(),
-  '/register': (context) => signUpScreen(),
-  '/home': (context)=>Home(),
-  '/forgetpass': (context)=>forgetpassword(),
-  '/register/createProfile': (context)=>createProfile(),
-  '/drivingProfile': (context)=>license(),
-
-});
+    // return MultiProvider(
+    //   providers: [
+    //     Provider<AuthService>(create:(_)=>AuthService(),
+    //     ),
+    //   ],
+      return MaterialApp(
+        title: 'Jom Share',
+        debugShowCheckedModeBanner: false,
+       initialRoute: '/',
+    
+    routes: {
+      '/': (context)=> splash(),
+      '/login': (context)=> login(),
+      '/register': (context) => signUpScreen(),
+      '/home': (context)=>Home(),
+      '/forgetpass': (context)=>forgetpassword(),
+      '/register/createProfile': (context)=>createProfile(),
+      '/drivingProfile': (context)=>license(),
+    
+    });
+    
   }
 }

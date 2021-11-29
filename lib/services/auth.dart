@@ -8,6 +8,7 @@ class AuthService
  CUser? _userFromFirebaseUser(User user) {
     return user != null ? CUser(uid: user.uid) : null;
   }
+
   String getUID()
   {
     return _auth.currentUser!.uid;

@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:jomshare/screens/Profile/DeleteAccout.dart';
 
 class SettingsUI extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+   
+    
+
+  //   final String uname;
+  //   final String address;
+  //   final String phone;
+ 
+  
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: "Setting UI",
@@ -17,9 +30,28 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
-  bool showPassword = false;
   @override
   Widget build(BuildContext context) {
+    //controller
+    final _namecontroller = TextEditingController();
+    final _address = TextEditingController();
+    final _phone = TextEditingController();
+
+     var userid;
+  var currentuser  = FirebaseAuth.instance.currentUser;
+  if(currentuser!=null){
+    userid = currentuser.uid;
+  }
+    CollectionReference users = FirebaseFirestore.instance.collection('user');
+    DocumentReference user = users.doc(userid);
+    Future<void>updateUser(){
+      return user.update({
+        'name':_namecontroller.text,
+        'address':_address.text,
+        'phone':_phone.text
+        }
+      ).then((value) => print("User Updated!")).catchError((error)=>print("Fail!"));
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -106,14 +138,62 @@ class _EditProfilePageState extends State<EditProfilePage> {
               SizedBox(
                 height: 35,
               ),
-              buildTextField("Full Name", "Elon Musk", false),
-              buildTextField("E-mail", "Musk@gmail.com", false),
-              buildTextField("Password", "********", true),
-              buildTextField("Location", "Kulai, Johor", false),
-              buildTextField("Phone Number", "019-7370225", false),
+               Padding(
+      padding: const EdgeInsets.only(bottom: 35.0),
+      child: TextField(
+        decoration: InputDecoration(
+            contentPadding: EdgeInsets.only(bottom: 3),
+            labelText: "Name",
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            hintText:_namecontroller.text,
+            hintStyle: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            )),
+            controller: _namecontroller,    
+      ),
+    ),
+             Padding(
+      padding: const EdgeInsets.only(bottom: 35.0),
+      child: TextField(
+        decoration: InputDecoration(
+            contentPadding: EdgeInsets.only(bottom: 3),
+            labelText: "Location",
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            hintText: _address.text,
+            hintStyle: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            )),
+            controller: _address,    
+      ),
+    ),
+     Padding(
+      padding: const EdgeInsets.only(bottom: 35.0),
+      child: TextField(
+        decoration: InputDecoration(
+            contentPadding: EdgeInsets.only(bottom: 3),
+            labelText: "Phone",
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            hintText: _phone.text,
+            hintStyle: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            )),
+            controller: _phone,    
+      ),
+    ),
               TextButton(
                 child: Text("Delete Account"),
-                onPressed: (){},
+                onPressed:(){
+                  Navigator.push(
+                    context,  
+                    MaterialPageRoute(builder: (context)=>DeleteAccount())
+                    );
+                },
                 style: TextButton.styleFrom(primary: Colors.white,backgroundColor: Colors.red),
                 ),
               SizedBox(
@@ -134,7 +214,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             color: Colors.black)),
                   ),
                   RaisedButton(
-                    onPressed: () {},
+                    onPressed: updateUser,
                     color: Colors.blue,
                     padding: EdgeInsets.symmetric(horizontal: 50),
                     elevation: 2,
@@ -156,37 +236,37 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ),
     );
   }
-
-  Widget buildTextField(
-      String labelText, String placeholder, bool isPasswordTextField) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 35.0),
-      child: TextField(
-        obscureText: isPasswordTextField ? showPassword : false,
-        decoration: InputDecoration(
-            suffixIcon: isPasswordTextField
-                ? IconButton(
-                    onPressed: () {
-                      setState(() {
-                        showPassword = !showPassword;
-                      });
-                    },
-                    icon: Icon(
-                      Icons.remove_red_eye,
-                      color: Colors.grey,
-                    ),
-                  )
-                : null,
-            contentPadding: EdgeInsets.only(bottom: 3),
-            labelText: labelText,
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-            hintText: placeholder,
-            hintStyle: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            )),
-      ),
-    );
-  }
 }
+//   Widget buildTextField(
+//       String labelText, String placeholder, bool isPasswordTextField) {
+//     return Padding(
+//       padding: const EdgeInsets.only(bottom: 35.0),
+//       child: TextField(
+//         obscureText: isPasswordTextField ? showPassword : false,
+//         decoration: InputDecoration(
+//             suffixIcon: isPasswordTextField
+//                 ? IconButton(
+//                     onPressed: () {
+//                       setState(() {
+//                         showPassword = !showPassword;
+//                       });
+//                     },
+//                     icon: Icon(
+//                       Icons.remove_red_eye,
+//                       color: Colors.grey,
+//                     ),
+//                   )
+//                 : null,
+//             contentPadding: EdgeInsets.only(bottom: 3),
+//             labelText: labelText,
+//             floatingLabelBehavior: FloatingLabelBehavior.always,
+//             hintText: placeholder,
+//             hintStyle: TextStyle(
+//               fontSize: 16,
+//               fontWeight: FontWeight.bold,
+//               color: Colors.black,
+//             )),
+            
+//       ),
+//     );
+//   }
