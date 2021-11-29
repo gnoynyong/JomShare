@@ -11,8 +11,11 @@ import 'package:jomshare/screens/offerpool/OfferCarPool.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:address_search_field/address_search_field.dart';
+import 'package:jomshare/services/userdatabase.dart';
 import 'dart:async';
 import 'package:location/location.dart';
+import 'package:jomshare/services/carpooldatabase.dart';
+import 'package:firebase_auth/firebase_auth.dart';
  LatLng _initialPositon=LatLng(3.140853,101.693207);
 
 Future<LatLng> _getPosition() async {
@@ -36,8 +39,9 @@ class Poolpage extends StatefulWidget {
 }
 
 class _PoolpageState extends State<Poolpage> {
+  bool _isloading=false;
   List <dynamic> Repeated_Day=['MON','TUE','WED','THU','FRI','SAT','SUN',];
-  String repatedDay="Repeated Days";
+  String repatedDay="";
   var type,selectedDay;
   List<bool> _selections = [true, false];
   final format = DateFormat("yyyy-MM-dd HH:mm");
@@ -70,7 +74,26 @@ class _PoolpageState extends State<Poolpage> {
     countryCode: 'MY',
   );
 
+  String convert (List<dynamic> x)
+  {
+    List<String> temp=[];
+    for (int i=0;i<x.length;i++)
+    {
+      temp.add(x[i].toString());
 
+    }
+    temp.sort((a,b){
+      return a.compareTo(b);
+    });
+
+    String stringReturn='';
+    for (int m=0;m<temp.length;m++)
+    {
+      stringReturn=stringReturn+"/"+temp[m];
+    }
+    return stringReturn;
+
+  }
   Widget dropdown ()
   {
     return GFMultiSelect(
@@ -270,8 +293,10 @@ class _PoolpageState extends State<Poolpage> {
                   ),
                   child: Container(
 
-                  child:
-                    OfferSearchBox(),
+                  child:_isloading? Center(child: CircularProgressIndicator(
+
+                  ),)
+                    :OfferSearchBox(),
 
                 ),
                             ):Container(),
@@ -531,8 +556,22 @@ class _PoolpageState extends State<Poolpage> {
 
                                   }
                                   else{
+                                    setState(() {
+                                      _isloading=true;
+                                    });
+                                    if (type=='One-Time')
+                                    {
+                                      repatedDay="";
 
 
+
+                                    }
+                                    else
+                                    {
+
+                                      repatedDay=convert(selectedDay);
+                                    }
+                                    print(repatedDay);
 
                                   print(OpickupCtrl.text);
                                    try {
@@ -574,6 +613,32 @@ class _PoolpageState extends State<Poolpage> {
                             } catch (e) {
                               print(e);
                             }
+                              var currentuser  = FirebaseAuth.instance.currentUser;
+                              var userid;
+
+                              if(currentuser!=null){
+                             userid = currentuser.uid;
+                             CarpoolService temp=CarpoolService();
+                             await temp.offerCarpool(OpickupCtrl.text, OdropCtrl.text, seat!, cartype!, type, plateno.text, price.text, Offerpickup, Offerdrop
+                             ,DT.text,repatedDay).then((value)
+                             {
+
+
+                               print ('done');
+                               setState(() {
+                                 _isloading=false;
+                               });
+
+                             });
+                             print ('yes');
+                             String newcarpoolid=await temp.getCarpoolId();
+                             UserDataBaseService user=UserDataBaseService(uid: userid);
+                             user.addCarpoolToUser(newcarpoolid);
+
+
+                            }
+
+
                                   }
 
 
