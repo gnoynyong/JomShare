@@ -25,7 +25,6 @@ class _PoolState extends State<Pool> {
               image: DecorationImage(
                 image: AssetImage("assets/image/map1.jpeg"),
                 fit: BoxFit.fill)
-
               ),
           ),
           Flexible(

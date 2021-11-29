@@ -42,6 +42,11 @@ dependencies:
   firebase_storage: ^10.1.0
   provider: ^6.0.1
 
+  flutter_google_places: ^0.3.0
+  google_maps_flutter: ^2.0.1
+  address_search_field: ^4.0.1
+  location: ^4.3.0
+
 
   getwidget: ^2.0.4
 

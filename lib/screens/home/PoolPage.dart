@@ -9,6 +9,24 @@ import 'package:getwidget/getwidget.dart';
 import 'package:jomshare/screens/findpool/FindCarPool.dart';
 import 'package:jomshare/screens/offerpool/OfferCarPool.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:address_search_field/address_search_field.dart';
+import 'dart:async';
+import 'package:location/location.dart';
+ LatLng _initialPositon=LatLng(3.140853,101.693207);
+
+Future<LatLng> _getPosition() async {
+  final Location location = Location();
+  if (!await location.serviceEnabled()) {
+    if (!await location.requestService()) throw 'GPS service is disabled';
+  }
+  if (await location.hasPermission() == PermissionStatus.denied) {
+    if (await location.requestPermission() != PermissionStatus.granted)
+      throw 'No GPS permissions';
+  }
+  final LocationData data = await location.getLocation();
+  return LatLng(data.latitude!, data.longitude!);
+}
 
 class Poolpage extends StatefulWidget {
   const Poolpage({ Key? key }) : super(key: key);
@@ -20,9 +38,37 @@ class Poolpage extends StatefulWidget {
 class _PoolpageState extends State<Poolpage> {
   List <dynamic> Repeated_Day=['MON','TUE','WED','THU','FRI','SAT','SUN',];
   String repatedDay="Repeated Days";
-  var type;
+  var type,selectedDay;
   List<bool> _selections = [true, false];
   final format = DateFormat("yyyy-MM-dd HH:mm");
+  late final GoogleMapController _controller;
+  bool pickup_is_Tap=false;
+  bool drop_is_Tap=false;
+  String ?cartype,seat;
+  TextEditingController plateno = TextEditingController();
+  TextEditingController price = TextEditingController();
+  TextEditingController DT = TextEditingController();
+  TextEditingController OpickupCtrl = TextEditingController();
+
+  TextEditingController OdropCtrl = TextEditingController();
+  TextEditingController FpickupCtrl = TextEditingController();
+
+  TextEditingController FdropCtrl = TextEditingController();
+
+  final polylines = Set<Polyline>();
+
+  final markers = Set<Marker>();
+  late LatLng Offerpickup;
+  late LatLng Offerdrop;
+    late LatLng Findpickup;
+  late LatLng Finddrop;
+
+  final geoMethods = GeoMethods(
+    /// [Get API key](https://developers.google.com/maps/documentation/embed/get-api-key)
+    googleApiKey: 'AIzaSyDCiCFG1oGg-XSj_67K6UzsHNU5UP5AvZA',
+    language: 'en',
+    countryCode: 'MY',
+  );
 
 
   Widget dropdown ()
@@ -32,7 +78,7 @@ class _PoolpageState extends State<Poolpage> {
 
         items: Repeated_Day,
         onSelect: (value) {
-          type=value;
+          selectedDay=value;
         },
         dropdownTitleTileText: 'Repeted Days',
         dropdownTitleTileColor: Colors.grey[200],
@@ -85,6 +131,8 @@ class _PoolpageState extends State<Poolpage> {
                     child: Column(
                       children: [
 
+
+
                         dropdown(),
                         SmallRoundButton(
                                 text: "Confirm",
@@ -121,12 +169,22 @@ class _PoolpageState extends State<Poolpage> {
             Container(
               height: MediaQuery.of(context).size.height*0.4,
               width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("assets/image/map1.jpeg"),
-                  fit: BoxFit.fill)
+              child:GoogleMap(
+              compassEnabled: true,
+              padding: EdgeInsets.fromLTRB(0, 50, 10, 0),
 
-                ),
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
+              rotateGesturesEnabled: true,
+              initialCameraPosition: CameraPosition(
+                target: _initialPositon,
+                zoom: 10.5,
+              ),
+              onMapCreated: (GoogleMapController controller) =>
+                  _controller = controller,
+              polylines: polylines,
+              markers: markers,
+            ),
             ),
             Container(
               // height: MediaQuery.of(context).size.height*0.42,
@@ -200,67 +258,7 @@ class _PoolpageState extends State<Poolpage> {
                   borderRadius:BorderRadius.only(topLeft: Radius.circular(24),topRight:Radius.circular(24)),
                   color: Colors.white,
                   ),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.all(5.0),
-                          child: TextFormField(
-                            decoration: const InputDecoration(
-                icon: const Icon(Icons.circle,color: Colors.green,),
-                hintText: 'Enter Pick Up Location',
-                labelText: 'Pick Up Locatioon',
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(5.0),
-                          child: TextFormField(
-                            decoration: const InputDecoration(
-                icon: const Icon(Icons.location_on,color:Colors.red),
-                hintText: 'Enter Drop Location',
-                labelText: 'Drop Location',
-                            ),
-                          ),
-                        ),
-                        /*Padding(
-                          padding: EdgeInsets.all(10.0),
-                          child: Column(
-                            children:[ TextButton(
-
-                child: Text("Pick a Date"),
-                onPressed: (){},
-                ),
-                            ]
-                          ),
-                          // child: TextFormField(
-                          //   decoration: const InputDecoration(
-                          //   icon: const Icon(Icons.calendar_today, color: Colors.black,),
-                          //   hintText: 'Enter Pick Up Date Time',
-                          //   labelText: 'Date & Time',
-                          //   ),
-                          //  ),
-                        ),
-                         Padding(
-                           padding: EdgeInsets.all(10.0),
-                           child: TextFormField(
-                            decoration: const InputDecoration(
-                            icon: const Icon(Icons.car_rental,color: Colors.black,),
-                            hintText: 'Enter Car Type',
-                            labelText: 'Car Type',
-                            ),
-                           ),
-                         ), */
-                        new Container(
-                            padding: const EdgeInsets.only(left: 150.0, top: 40.0),
-                            child: new RaisedButton(
-                child: const Text('Find Pool'),
-                onPressed: (){
-                  Navigator.pop(context);
-                },
-                            )),
-                      ],
-                    ),
+                  child: FindSearchBox()
                             ):Container(),
               _selections[1]==true?
                 Container(
@@ -270,40 +268,101 @@ class _PoolpageState extends State<Poolpage> {
                   borderRadius:BorderRadius.only(topLeft: Radius.circular(24),topRight:Radius.circular(24)),
                   color: Colors.white,
                   ),
-                  child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Flexible(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
+                  child: Container(
+
+                  child:
+                    OfferSearchBox(),
+
+                ),
+                            ):Container(),
+                ],
+                )
+
+            ),
+          ],
+        ),
+      ),
+
+    );
+  }
+
+  Widget OfferSearchBox ()
+  {
+
+    return RouteSearchBox(
+      originCtrl: OpickupCtrl,
+      destinationCtrl: OdropCtrl,
+      geoMethods: geoMethods,
+      builder: (context, originBuilder, destinationBuilder,
+                waypointBuilder, waypointsMgr, relocate, getDirections) {
+              if (OpickupCtrl.text.isEmpty)
+                relocate(AddressId.origin, _initialPositon.toCoords());
+              return  Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                children: [
+                  Flexible(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Flexible(
+                                child: TextFormField(
+
+
+
+
+                                  controller: OpickupCtrl,
+                                  onTap: ()=>showDialog(context: context,
+                                  builder:(context) {
+                                    pickup_is_Tap=true;
+                                    return originBuilder.buildDefault(
+                              builder: AddressDialogBuilder(),
+                              onDone: (address) {
+
+                                return null;},
+                            );
+                                  }
+                                  ),
+                                  decoration: InputDecoration(
+                                    icon: const Icon(Icons.circle,color: Colors.green,),
+                                    hintText: 'Enter Pick Up Location',
+                                    labelText: 'Pick Up Location',
+                                  ),
+                                ),
+                                ),
+                                Flexible(
+                                child: TextFormField(
+
+                                  controller: OdropCtrl,
+                                  onTap: () => showDialog(
+                            context: context,
+                            builder: (context) => destinationBuilder.buildDefault(
+
+                              builder: AddressDialogBuilder(),
+                              onDone: (address) {
+
+                                return null;},
+                            ),
+                          ),
+                                  decoration: InputDecoration(
+                                    icon: const Icon(Icons.location_on,color: Colors.red,),
+                                    hintText: 'Enter Drop Location',
+                                    labelText: 'Drop Location',
+                                  ),
+                                ),
+                                ),
+                            ],
+                          ),
+                          ),
                           Flexible(
-                            child: TextFormField(
-                              decoration: InputDecoration(
-                                icon: const Icon(Icons.circle,color: Colors.green,),
-                                hintText: 'Enter Pick Up Location',
-                                labelText: 'Pick Up Location',
-                              ),
-                            ),
-                            ),
-                            Flexible(
-                            child: TextFormField(
-                              decoration: InputDecoration(
-                                icon: const Icon(Icons.location_on,color: Colors.red,),
-                                hintText: 'Enter Drop Location',
-                                labelText: 'Drop Location',
-                              ),
-                            ),
-                            ),
-                        ],
-                      ),
-                      ),
-                      Flexible(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                             Flexible(
                             child: DateTimeField(
+
+
+                              controller: DT,
                       decoration: InputDecoration(icon: Icon(Icons.event), hintText: 'Date Time',),
 
                       format: format,
@@ -328,6 +387,7 @@ class _PoolpageState extends State<Poolpage> {
                             ),
                             Flexible(
                               child: DropdownButtonFormField<String>(
+
                               decoration: InputDecoration(
                               icon: Icon(Icons.people),
                               ),
@@ -338,18 +398,27 @@ class _PoolpageState extends State<Poolpage> {
                               child: new Text(value),
                             );
                               }).toList(),
-                            onChanged: (_) {},
+                            onChanged: (value) {
+                              setState(() {
+                                seat=value;
+
+                              });
+
+
+                            },
                             ),
                               ),
                         ],
                       ),
                       ),
-                      Flexible(
+
+                          Flexible(
                         child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Flexible(
                               child: DropdownButtonFormField<String>(
+
                               decoration: InputDecoration(
                               icon: Icon(Icons.directions_car),
                               ),
@@ -361,13 +430,20 @@ class _PoolpageState extends State<Poolpage> {
 
                             );
                               }).toList(),
-                            onChanged: (_) {},
+                            onChanged: (value) {
+                              setState(() {
+                                cartype=value;
+                              });
+
+                            },
                             ),
                               ),
 
 
+
                             Flexible(
                               child: DropdownButtonFormField<String>(
+
                               decoration: InputDecoration(
                               icon: Icon(Icons.merge_type),
                               ),
@@ -390,35 +466,265 @@ class _PoolpageState extends State<Poolpage> {
                         ],
                       ),
                         ),
+                        Flexible(
+                          child: Row(
+                            children: [
+                              Flexible(child: TextFormField(
+
+                                controller: plateno,
+
+                                decoration: InputDecoration(
+
+                                  icon: Icon(Icons.directions_car),
+                                  labelText: 'Plate No'
+
+                                )
+
+                              )),
+                              Flexible(child: TextFormField(
+
+                                controller: price,
+                                keyboardType: TextInputType.numberWithOptions(
+                                  signed: false,
+                                  decimal:true,
+                                ),
+
+                                decoration: InputDecoration(
+
+                                  icon: Icon(Icons.attach_money),
+                                  labelText: 'Price (RM)'
+
+                                )
+
+                              )),
+                            ],
+                          )
+                        )
+                        ,
                         SizedBox(height: 10,),
 
 
                           frequent()
                         ,
+
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Flexible(
+                               Flexible(
                               child: SmallRoundButton(
                                 text: "Offer Pool",
-                                press: (){},
+                                press: () async{
+                                  if (OpickupCtrl.text==''||OdropCtrl.text==''||DT.text==''||seat==null||cartype==null||type==null
+                                  ||plateno.text==''||price.text=='')
+                                  {
+
+
+                                     showDialog(
+                                            context: context,
+                                           builder: (context) => AlertDialog(
+                                                title: Text('Incomplete Fields'),
+                                          content: Text("Please makesure all fields for offerring carpool are filled"),
+                                         actions: [
+                                              TextButton(onPressed: (){Navigator.pop(context);}, child: Text('Ok'))
+                                                  ],
+              ));
+
+                                  }
+                                  else{
+
+
+
+                                  print(OpickupCtrl.text);
+                                   try {
+                              final result = await getDirections();
+                              markers.clear();
+                              polylines.clear();
+                              Offerpickup= Marker(
+                                    markerId: MarkerId('origin'),
+                                    position: result.origin.coords!).position;
+                              Offerdrop= Marker(
+                                    markerId: MarkerId('dest'),
+                                    position: result.destination.coords!).position;
+                                    print('offerpickup:' );
+                                    print(Offerpickup);
+                                     print('droppickup:' );
+                                    print(Offerdrop);
+                              markers.addAll([
+                                Marker(
+                                    markerId: MarkerId('origin'),
+                                    position: result.origin.coords!),
+                                Marker(
+                                    markerId: MarkerId('dest'),
+                                    position: result.destination.coords!)
+                              ]);
+                              result.waypoints.asMap().forEach((key, value) =>
+                                  markers.add(Marker(
+                                      markerId: MarkerId('point$key'),
+                                      position: value.coords!)));
+                              polylines.add(Polyline(
+                                polylineId: PolylineId('result'),
+                                points: result.points,
+                                color: Colors.blue,
+                                width: 5,
+                              ));
+                              setState(() {});
+                              await _controller.animateCamera(
+                                  CameraUpdate.newLatLngBounds(
+                                      result.bounds, 60.0));
+                            } catch (e) {
+                              print(e);
+                            }
+                                  }
+
+
+
+
+                                },
                                 bckcolor: darkblue,
                                 textColor: Colors.white,
                                 btnstyle: TextStyle(fontSize: 15.0)),
                               ),
+
+
                           ],
                         )
-                  ],
-                ),
-                            ):Container(),
+
                 ],
-                )
+              );
+                }
+      );
+  }
 
-            ),
-          ],
-        ),
-      ),
 
-    );
+  Widget FindSearchBox ()
+  {
+    return RouteSearchBox(
+      originCtrl: FpickupCtrl,
+      destinationCtrl: FdropCtrl,
+      geoMethods: geoMethods,
+      builder: (context, originBuilder, destinationBuilder,
+                waypointBuilder, waypointsMgr, relocate, getDirections) {
+              if (FpickupCtrl.text.isEmpty)
+                relocate(AddressId.origin, _initialPositon.toCoords());
+              return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.all(5.0),
+                          child: TextField(
+
+
+                                  controller: FpickupCtrl,
+                                  onTap: ()=>showDialog(context: context,
+                                  builder:(context) {
+                                    pickup_is_Tap=true;
+                                    return originBuilder.buildDefault(
+                              builder: AddressDialogBuilder(),
+                              onDone: (address) {
+
+                                return null;},
+                            );
+                                  }
+                                  ),
+                                  decoration: InputDecoration(
+                                    icon: const Icon(Icons.circle,color: Colors.green,),
+                                    hintText: 'Enter Pick Up Location',
+                                    labelText: 'Pick Up Location',
+                                  ),
+                                ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(5.0),
+                          child: TextFormField(
+                                  controller: FdropCtrl,
+                                  onTap: () => showDialog(
+                            context: context,
+                            builder: (context) => destinationBuilder.buildDefault(
+
+                              builder: AddressDialogBuilder(),
+                              onDone: (address) {
+
+                                return null;},
+                            ),
+                          ),
+                                  decoration: InputDecoration(
+                                    icon: const Icon(Icons.location_on,color: Colors.red,),
+                                    hintText: 'Enter Drop Location',
+                                    labelText: 'Drop Location',
+                                  ),
+                                ),
+                        ),
+
+                        new Container(
+                            padding: const EdgeInsets.only(left: 150.0, top: 40.0),
+                            child: new RaisedButton(
+                child: const Text('Find Pool'),
+                onPressed: () async{
+                  if (FpickupCtrl.text==''||FdropCtrl.text=='')
+                                  {
+
+                                     showDialog(
+                                            context: context,
+                                           builder: (context) => AlertDialog(
+                                                title: Text('Incomplete Fields'),
+                                          content: Text("Please makesure all fields for finding carpool are filled"),
+                                         actions: [
+                                              TextButton(onPressed: (){Navigator.pop(context);}, child: Text('Ok'))
+                                                  ],
+              ));
+
+                                  }
+                    else
+                    {
+
+
+                                   try {
+                              final result = await getDirections();
+                              markers.clear();
+                              polylines.clear();
+                              Findpickup= Marker(
+                                    markerId: MarkerId('origin'),
+                                    position: result.origin.coords!).position;
+                                  Finddrop= Marker(
+                                    markerId: MarkerId('dest'),
+                                    position: result.destination.coords!).position;
+                                    print('findpickup:' );
+                                    print(Findpickup);
+                                     print('findpickup:' );
+                                    print(Finddrop);
+                              markers.addAll([
+                                Marker(
+                                    markerId: MarkerId('origin'),
+                                    position: result.origin.coords!),
+                                Marker(
+                                    markerId: MarkerId('dest'),
+                                    position: result.destination.coords!)
+                              ]);
+                              result.waypoints.asMap().forEach((key, value) =>
+                                  markers.add(Marker(
+                                      markerId: MarkerId('point$key'),
+                                      position: value.coords!)));
+                              polylines.add(Polyline(
+                                polylineId: PolylineId('result'),
+                                points: result.points,
+                                color: Colors.blue,
+                                width: 5,
+                              ));
+                              setState(() {});
+                              await _controller.animateCamera(
+                                  CameraUpdate.newLatLngBounds(
+                                      result.bounds, 60.0));
+                            } catch (e) {
+                              print(e);
+                            }
+                    }
+
+
+                },
+                            )),
+                      ],
+                    );
+                }
+      );
   }
 }
