@@ -1,7 +1,7 @@
 // ignore_for_file: file_names, prefer_const_constructors
 
 import 'package:flutter/material.dart';
-// import 'package:jomshare/screens/Manage/ViewOffer.dart';
+import 'package:jomshare/screens/Manage/ViewOffer.dart';
 
 import 'Offer.dart';
 
@@ -33,34 +33,28 @@ class OfferCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              offer.time,
+              offer.datetime,
               style: TextStyle(
                 fontSize: 16.0,
               ),
             ),
-            SizedBox(height: 3.0),
-            Row(
-              children: [
-                Icon(Icons.date_range),
-                SizedBox(width: 10.0),
-                Text(
-                  offer.date,
-                  style: TextStyle(color: Colors.black87),
-                ),
-              ],
-            ),
+            // SizedBox(height: 3.0),
+            // Row(
+            //   children: [
+            //     Icon(Icons.date_range),
+            //     SizedBox(width: 10.0),
+            //     Text(
+            //       offer.date,
+            //       style: TextStyle(color: Colors.black87),
+            //     ),
+            //   ],
+            // ),
             SizedBox(height: 15.0),
             Row(
               children: [
                 Icon(Icons.airport_shuttle),
                 SizedBox(width: 15.0),
-                Text(offer.start),
-                SizedBox(width: 140.0,),
-                 ElevatedButton(
-                  onPressed: () {
-                  },
-                  child: Text("Delete")
-                )
+                Text(offer.start)
               ],
             ),
             Icon(Icons.more_vert),
@@ -69,13 +63,20 @@ class OfferCard extends StatelessWidget {
                 Icon(Icons.arrow_downward),
                 SizedBox(width: 15.0),
                 Text(offer.destination),
-                SizedBox(width: 150.0),
+                Spacer(),
                 ElevatedButton(
+                  style: ButtonStyle(
+                    shadowColor: MaterialStateProperty.all(Colors.grey),
+                    overlayColor: MaterialStateProperty.all(Colors.blue[400]),
+                  ),
                   onPressed: () {
-                   
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => viewoffer(voffer:offer)),
+                    );
                   },
-                  child: Text("Edit")
-                )
+                  child: Text("View")
+                ),
               ],
             ),
           ],

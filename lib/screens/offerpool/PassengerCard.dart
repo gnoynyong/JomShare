@@ -23,8 +23,6 @@ class PassengerCard extends StatelessWidget {
               width: 8.0,
             ),
             Text(psg.name),
-            (psg.isAccepted==true)
-            ?
             Padding(
                padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Row(
@@ -46,11 +44,6 @@ class PassengerCard extends StatelessWidget {
                 ],
               ),
             )
-            :
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 35.0),
-              child:Text("Accepted",style: TextStyle(color: Colors.black54,fontSize: 18.0),) ,
-              )
           ],
         ),
         ),
