@@ -2,9 +2,13 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:jomshare/constants.dart';
 import 'package:jomshare/screens/Manage/Offer.dart';
 import 'package:jomshare/screens/Manage/EditOffer.dart';
+import 'package:jomshare/screens/Manage/OfferedBody.dart';
+import 'package:jomshare/screens/Manage/manageHome.dart';
+import 'package:jomshare/screens/home/home.dart';
 import 'package:jomshare/screens/offerpool/AcceptPool.dart';
 import 'package:jomshare/screens/welcome/components/body.dart';
 
@@ -31,7 +35,33 @@ class viewoffer extends StatelessWidget {
   CollectionReference carpooldb =
       FirebaseFirestore.instance.collection('carpool');
   Future<void> deleteCarpool() {
+    FirebaseFirestore.instance.collection("user").doc(FirebaseAuth.instance.currentUser!.uid).update({'Offered carpools':FieldValue.arrayRemove([voffer.offerpoolid])});
     return carpooldb.doc(voffer.offerpoolid).delete();
+  }
+  String convert(String x)
+  {
+    List day=['Mon','Tue','Wed','Thurs','Fri','Sat','Sun'];
+    List <String> daylist=x.substring(1).split('/');
+    print(daylist);
+   String temp="";
+
+    for (int z =0;z<daylist.length;z++)
+    {
+      for (int m=0;m<day.length;m++)
+      {
+        if (int.parse(daylist[z])==(m))
+        {
+          temp=temp+"-"+day[m];
+        }
+      }
+
+
+
+    }
+    temp=temp.substring(1);
+    print (temp);
+    return temp;
+
   }
 
   @override
@@ -39,6 +69,13 @@ class viewoffer extends StatelessWidget {
     return Scaffold(
       // backgroundColor: Colors.grey[100],
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: ()
+          {
+            Navigator.popUntil(context, ModalRoute.withName('/home'));
+
+          },
+          icon: Icon(Icons.arrow_back),),
           title: const Text("View Detail Information"),
           backgroundColor: lightpp),
       body: SingleChildScrollView(
@@ -88,6 +125,29 @@ class viewoffer extends StatelessWidget {
             padding: const EdgeInsets.only(left: 25.0, right: 25.0, top: 20.0),
             child: Column(
               children: [
+                Row(children: [
+                  Expanded(
+                      flex: 1,
+                      child: Text(
+                        "Carpool Type :",
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        voffer.type+" carpool",
+                        style: TextStyle(fontSize: 17.5),
+                      ),
+                    ),
+
+
+                ],)
+                ,
+                SizedBox(height: 20,),
                 Row(
                   children: [
                     Expanded(
@@ -127,10 +187,13 @@ class viewoffer extends StatelessWidget {
                     Expanded(
                       flex: 1,
                       child: voffer.type == "Frequent"
-                          ? Text(
-                              voffer.repeatedDay,
-                              style: TextStyle(fontSize: 17.5),
-                            )
+                          ? SizedBox(
+                            width: 100,
+                            child: Text(
+                                convert(voffer.repeatedDay),
+                                style: TextStyle(fontSize: 17.5),
+                              ),
+                          )
                           : Container(),
                     ),
                   ],
@@ -140,13 +203,17 @@ class viewoffer extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    Text(
+                    SizedBox(
+                      width: 150,
+                      child: Text(
                       "Starting Point:",
                       style: TextStyle(
                           fontSize: 16.0,
                           fontWeight: FontWeight.bold,
                           color: Colors.grey),
                     )
+                    )
+
                   ],
                 ),
                 SizedBox(
@@ -154,10 +221,14 @@ class viewoffer extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    Text(
+                    SizedBox(
+                      width: 260,
+                      child:  Text(
                       voffer.start,
                       style: TextStyle(fontSize: 17.5),
                     )
+                    )
+
                   ],
                 ),
                 SizedBox(
@@ -165,13 +236,15 @@ class viewoffer extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    Text(
+                    SizedBox(width: 200,
+                    child:Text(
                       "Destination:",
                       style: TextStyle(
                           fontSize: 16.0,
                           fontWeight: FontWeight.bold,
                           color: Colors.grey),
-                    )
+                    ))
+
                   ],
                 ),
                 SizedBox(
@@ -179,10 +252,12 @@ class viewoffer extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    Text(
+                    SizedBox(width: 260,
+                    child: Text(
                       voffer.destination,
                       style: TextStyle(fontSize: 17.5),
-                    )
+                    ))
+
                   ],
                 ),
                 SizedBox(
@@ -281,104 +356,100 @@ class viewoffer extends StatelessWidget {
                 SizedBox(
                   height: 15.0,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.green),
-                        shadowColor: MaterialStateProperty.all(Colors.grey),
-                        overlayColor:
-                            MaterialStateProperty.all(Colors.green[400]),
-                        shape: MaterialStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => AcceptPool(accept: voffer)),
-                        );
-                      },
-                      child: Wrap(
-                        spacing: 10.0,
-                        children: [
-                          Icon(
-                            Icons.people,
-                            size: 20.0,
-                          ),
-                          Text(
-                            "View request",
-                            style: TextStyle(fontSize: 16.0),
-                          ),
-                        ],
+                ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.green),
+                    shadowColor: MaterialStateProperty.all(Colors.grey),
+                    overlayColor:
+                        MaterialStateProperty.all(Colors.green[400]),
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
                       ),
                     ),
-                    ElevatedButton(
-                      style: ButtonStyle(
-                        shadowColor: MaterialStateProperty.all(Colors.grey),
-                        overlayColor:
-                            MaterialStateProperty.all(Colors.blue[400]),
-                        shape: MaterialStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                        ),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => AcceptPool(accept: voffer)),
+                    );
+                  },
+                  child: Wrap(
+                    spacing: 10.0,
+                    children: [
+                      Icon(
+                        Icons.people,
+                        size: 20.0,
                       ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => editoffer(eoffer: voffer)),
-                        );
-                      },
-                      child: Wrap(
-                        spacing: 10.0,
-                        children: [
-                          Icon(
-                            Icons.edit,
-                            size: 20.0,
-                          ),
-                          Text(
-                            "Edit",
-                            style: TextStyle(fontSize: 16.0),
-                          ),
-                        ],
+                      Text(
+                        "View request",
+                        style: TextStyle(fontSize: 16.0),
                       ),
-                    ),
-                    ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.red),
-                        shadowColor: MaterialStateProperty.all(Colors.grey),
-                        overlayColor:
-                            MaterialStateProperty.all(Colors.red[400]),
-                        shape: MaterialStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                        ),
-                      ),
-                      onPressed: () {
-                        deleteCarpool();
-                      },
-                      child: Wrap(
-                        spacing: 10.0,
-                        children: [
-                          Icon(
-                            Icons.delete,
-                            size: 20.0,
-                          ),
-                          Text(
-                            "Delete",
-                            style: TextStyle(fontSize: 16.0),
-                          ),
-                        ],
+                    ],
+                  ),
+                ),
+                ElevatedButton(
+                  style: ButtonStyle(
+                    shadowColor: MaterialStateProperty.all(Colors.grey),
+                    overlayColor:
+                        MaterialStateProperty.all(Colors.blue[400]),
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
                       ),
                     ),
-                  ],
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => editoffer(eoffer: voffer)),
+                    );
+                  },
+                  child: Wrap(
+                    spacing: 10.0,
+                    children: [
+                      Icon(
+                        Icons.edit,
+                        size: 20.0,
+                      ),
+                      Text(
+                        "Edit",
+                        style: TextStyle(fontSize: 16.0),
+                      ),
+                    ],
+                  ),
+                ),
+                ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.red),
+                    shadowColor: MaterialStateProperty.all(Colors.grey),
+                    overlayColor:
+                        MaterialStateProperty.all(Colors.red[400]),
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    ),
+                  ),
+                  onPressed: () {
+                    deleteCarpool();
+                    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>Home()));
+                  },
+                  child: Wrap(
+                    spacing: 10.0,
+                    children: [
+                      Icon(
+                        Icons.delete,
+                        size: 20.0,
+                      ),
+                      Text(
+                        "Delete",
+                        style: TextStyle(fontSize: 16.0),
+                      ),
+                    ],
+                  ),
                 )
               ],
             ),

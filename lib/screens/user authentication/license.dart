@@ -26,7 +26,8 @@ class _licenseState extends State<license> {
   bool carResult=false;
   String licenseType="";
   String uid="";
-
+  bool _isloading=false;
+final GlobalKey<State> _keyLoader = new GlobalKey<State>();
 final AuthService _auth = AuthService();
   Widget vehicleOption ()
   {
@@ -213,9 +214,12 @@ final AuthService _auth = AuthService();
         primary: Colors.blue[900]
     ),
                         onPressed: () async {
+
+
                             LicenseOption==option.No?licenseResult=false:licenseResult=true;
                             dynamic result = await _auth.registerWithEmailAndPassword(arguments['email'],arguments['pass']);
                             licenseType="";
+
                             if (licenseResult)
                             {
 
@@ -226,6 +230,7 @@ final AuthService _auth = AuthService();
                               }
                             }
 
+
                             if (result==null)
                             {
                               showAlert(context);
@@ -234,6 +239,7 @@ final AuthService _auth = AuthService();
                             }
                             else
                             {
+
                               File image=arguments['picture'];
                               dynamic result = await _auth.signInWithEmailAndPassword(arguments['email'],arguments['pass']);
                               final user=UserDataBaseService(uid:_auth.getUID() );
@@ -242,8 +248,13 @@ final AuthService _auth = AuthService();
                             String url=await user.uploadImageToFirebase(context, image);
                             print(url);
                              await user.addUser(arguments['name'], arguments['ic'], arguments['gender'], arguments['age'], arguments['phone'], arguments['address'], arguments['occupation']
-                              ,licenseResult,carResult,licenseType,url);
-                              CircularProgressIndicator;
+                              ,licenseResult,carResult,licenseType,url).then((value) {
+
+
+                              });
+
+
+
                               Navigator.pushNamed(context, '/login');
 
 
@@ -285,4 +296,26 @@ final AuthService _auth = AuthService();
                 ],
               ));
     }
+    static Future<void> showLoadingDialog(
+      BuildContext context, GlobalKey key) async {
+    return showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new WillPopScope(
+              onWillPop: () async => false,
+              child: SimpleDialog(
+                  key: key,
+                  backgroundColor: Colors.black54,
+                  children: <Widget>[
+                    Center(
+                      child: Column(children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 10,),
+                        Text("Please Wait....",style: TextStyle(color: Colors.blueAccent),)
+                      ]),
+                    )
+                  ]));
+        });
+  }
 }

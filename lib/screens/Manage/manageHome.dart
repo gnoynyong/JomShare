@@ -33,6 +33,15 @@ void initState() {
 
       child: Scaffold(
         appBar: AppBar(
+          actions: [
+            IconButton(icon: Icon(Icons.cached_rounded),
+          onPressed: ()
+          {
+            setState(() {
+
+            });
+          },)
+          ],
           backgroundColor: lightpp,
 
           title: Text('Manage My Carpools') ,

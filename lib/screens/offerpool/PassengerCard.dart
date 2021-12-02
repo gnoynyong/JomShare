@@ -4,12 +4,13 @@ import 'Passenger.dart';
 class PassengerCard extends StatelessWidget {
   final Passenger psg;
   const PassengerCard({
-     Key? key,
+
      required this.psg
-     }) : super(key: key);
+     }) ;
 
   @override
   Widget build(BuildContext context) {
+    print("passenger yes");
     return Container(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal:20.0, vertical:15.0),
