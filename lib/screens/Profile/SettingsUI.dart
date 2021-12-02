@@ -7,20 +7,7 @@ import 'package:jomshare/screens/Profile/DeleteAccout.dart';
 class SettingsUI extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-   
-    
-
-  //   final String uname;
-  //   final String address;
-  //   final String phone;
- 
-  
-
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: "Setting UI",
-      home: EditProfilePage(),
-    );
+    return EditProfilePage();
   }
 }
 
@@ -32,11 +19,13 @@ class EditProfilePage extends StatefulWidget {
 class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
+     
     //controller
     final _namecontroller = TextEditingController();
     final _address = TextEditingController();
     final _phone = TextEditingController();
 
+   
      var userid;
   var currentuser  = FirebaseAuth.instance.currentUser;
   if(currentuser!=null){
@@ -52,8 +41,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
         }
       ).then((value) => print("User Updated!")).catchError((error)=>print("Fail!"));
     }
-    return Scaffold(
-      appBar: AppBar(
+    return FutureBuilder<DocumentSnapshot>(
+      future: user.get(),
+      builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot){
+        if(snapshot.hasError){
+          return Text("Something went wrong");
+        }
+        if(snapshot.connectionState==ConnectionState.done){
+          Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
+         _namecontroller.text=data["name"];
+          _address.text=data["address"];
+          _phone.text=data["phone"];
+          return Scaffold(
+        appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 1,
         leading: IconButton(
@@ -61,7 +61,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
             Icons.arrow_back,
             color: Colors.blue,
           ),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         actions: [
           IconButton(
@@ -110,7 +112,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           image: DecorationImage(
                               fit: BoxFit.cover,
                               image: NetworkImage(
-                                "https://static.dw.com/image/53120612_303.jpg",
+                               data["url"]
                               ))),
                     ),
                     Positioned(
@@ -235,6 +237,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ),
       ),
     );
+        }
+        return Text("Loading");
+      },
+    );
+    
   }
 }
 //   Widget buildTextField(

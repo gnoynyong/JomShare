@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:jomshare/screens/Manage/manageHome.dart';
+import 'package:jomshare/screens/Profile/UserProfile.dart';
 import 'package:jomshare/screens/contact/ChatPage.dart';
 import 'package:jomshare/screens/home/Pool.dart';
 import 'package:jomshare/screens/home/Poolpage.dart';
@@ -32,7 +33,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 int _currentIndex = 0;
-  final List _children = [Poolpage(),manageHome(),ChatPage(),SettingsUI()];
+  final List _children = [Poolpage(),manageHome(),ChatPage(),UserProfile()];
 
   Widget build(BuildContext context) {
 
