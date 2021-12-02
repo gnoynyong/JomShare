@@ -28,7 +28,7 @@ class OfferCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -54,7 +54,8 @@ class OfferCard extends StatelessWidget {
               children: [
                 Icon(Icons.airport_shuttle),
                 SizedBox(width: 15.0),
-                Text(offer.start)
+                SizedBox(width: 200,
+                child:  Text(offer.start),),
               ],
             ),
             Icon(Icons.more_vert),
@@ -62,7 +63,9 @@ class OfferCard extends StatelessWidget {
               children: [
                 Icon(Icons.arrow_downward),
                 SizedBox(width: 15.0),
-                Text(offer.destination),
+                SizedBox(width: 200,
+                child:  Text(offer.destination),),
+
                 Spacer(),
                 ElevatedButton(
                   style: ButtonStyle(
@@ -70,6 +73,7 @@ class OfferCard extends StatelessWidget {
                     overlayColor: MaterialStateProperty.all(Colors.blue[400]),
                   ),
                   onPressed: () {
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => viewoffer(voffer:offer)),

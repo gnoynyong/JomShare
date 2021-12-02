@@ -19,11 +19,13 @@ class OfferedBody extends StatefulWidget {
 }
 
 class _OfferedBodyState extends State<OfferedBody> {
-  List<dynamic> carpoolist = <dynamic>[];
+  bool _isloading=false;
+  List<Offer> carpoolist = <Offer>[];
   final Stream<DocumentSnapshot> userdoc = FirebaseFirestore.instance
       .collection('user')
       .doc(FirebaseAuth.instance.currentUser!.uid)
       .snapshots();
+
 
 //   @override
 // void initState() {
@@ -33,6 +35,8 @@ class _OfferedBodyState extends State<OfferedBody> {
 
   @override
   Widget build(BuildContext context) {
+
+    print(FirebaseAuth.instance.currentUser!.uid);
     return StreamBuilder<DocumentSnapshot>(
       stream: userdoc,
       builder:
@@ -43,18 +47,48 @@ class _OfferedBodyState extends State<OfferedBody> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Text("Loading..");
         }
-        if (snapshot.hasData) {
-          final cvalue = snapshot.data!.data()!["Offered carpools"];
-          List<String> mycarpoolid = List.from(cvalue);
-          print(mycarpoolid.length);
+        List temp=snapshot.data!["Offered carpools"];
+        if (temp.length==0)
+        {
+          return Center(child: Text('No carpool has been offered yet.',style: TextStyle(fontSize: 20),));
+        }
+        if(snapshot.hasData) {
+          List cvalue = [];
+          cvalue.clear();
+          cvalue=snapshot.data!.data()!["Offered carpools"];
+          print(cvalue);
+          List<String> mycarpoolid = [];
+          mycarpoolid.clear();
+
+          for (int m=0;m<cvalue.length;m++)
+          {
+            mycarpoolid.add(cvalue[m].toString());
+          }
+          print(mycarpoolid);
           CollectionReference carpool =
               FirebaseFirestore.instance.collection("carpool");
-          // if (carpoolist.isNotEmpty) {
-          //   carpoolist.clear();
-          // }
+
+          int dex=0;
+
+
+
           mycarpoolid.forEach((element) async {
+            dex++;
             DocumentReference cdoc = carpool.doc(element);
+            print(cdoc.id);
             DocumentSnapshot cds = await cdoc.get();
+            List temp=[];
+            print('start');
+            print(element);
+            print(cds.data()!["Date Time"]);
+            print(cds.data()!["Pickup address"]);
+            print(cds.data()!["Drop address"]);
+             print(cds.data()!["Car type"]);
+             print(cds.data()!["Plate no"]);
+             print(cds.data()!["Price"]);
+             print(cds.data()!["Pool type"]);
+             print(cds.data()!["Repeated Day"]);
+
             Offer offerpool = new Offer(
               datetime: cds.data()!["Date Time"],
               start: cds.data()!["Pickup address"],
@@ -65,12 +99,50 @@ class _OfferedBodyState extends State<OfferedBody> {
               type: cds.data()!["Pool type"],
               repeatedDay: cds.data()!["Repeated Day"],
               offerpoolid: element,
-              requestid:List.from(cds.data()!["requestList"]),
+
             );
-            carpoolist.add(offerpool);
+            if (cds.data()!["requestList"]!=null)
+            {
+              offerpool.addRequest(cds.data()!["requestList"]);
+              print("RequestID: ${offerpool.requestid}");
+            }
+
+            print(!carpoolist.contains(offerpool));
+            print(carpoolist);
+            bool check=false;
+            int listindex=0;
+            for (int p=0;p<carpoolist.length;p++)
+            {
+              check=false;
+              if (carpoolist[p].offerpoolid==offerpool.offerpoolid)
+              {
+                check=true;
+                listindex=p;
+                break;
+
+              }
+            }
+            if(check)
+            {
+              print('exist');
+              print(listindex);
+              print(carpoolist[listindex]);
+              carpoolist.removeAt(listindex);
+              carpoolist.insert(listindex, offerpool);
+              print(carpoolist[listindex]);
+            }
+            else
+            {
+              carpoolist.add(offerpool);
+            }
+
+
             print("Carpool read");
+            print("size:"+carpoolist.length.toString());
+
           });
         }
+
         return Container(
             color: Colors.grey[100],
             child: Column(children: [
@@ -78,10 +150,13 @@ class _OfferedBodyState extends State<OfferedBody> {
                   child: ListView.builder(
                       padding: const EdgeInsets.all(10),
                       itemCount: carpoolist.length,
-                      itemBuilder: (context, index) => OfferCard(
+                      itemBuilder: (context, index) {
+
+                        return OfferCard(
                             offer: carpoolist[index],
                             press: () {},
-                          ))),
+                          );
+                      } )),
             ]));
       },
     );

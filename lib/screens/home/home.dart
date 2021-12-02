@@ -11,7 +11,20 @@ import 'package:jomshare/constants.dart';
 import 'package:jomshare/screens/Profile/SettingsUI.dart';
 
 class Home extends StatefulWidget {
+  int index=0;
 
+  Home()
+  {
+
+  }
+  Home.set (int x)
+  {
+    index=x;
+  }
+  int getvalue()
+  {
+    return index;
+  }
 
   @override
   _HomeState createState() => _HomeState();
@@ -22,6 +35,10 @@ int _currentIndex = 0;
   final List _children = [Poolpage(),manageHome(),ChatPage(),SettingsUI()];
 
   Widget build(BuildContext context) {
+
+
+
+
 
     return Scaffold(
       body: _children.elementAt(_currentIndex),
@@ -38,6 +55,9 @@ int _currentIndex = 0;
                 .textTheme
                 .copyWith(caption: new TextStyle(color: Colors.yellow))),
             child: BottomNavigationBar(
+
+
+
 
               elevation: 0,
 

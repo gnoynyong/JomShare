@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jomshare/screens/Manage/ViewOffer.dart';
 import 'package:jomshare/screens/user%20authentication/createProfile.dart';
 import 'package:jomshare/screens/user%20authentication/forgetpassword.dart';
 import 'package:jomshare/screens/user%20authentication/license.dart';
@@ -36,7 +37,7 @@ class MyApp extends StatelessWidget {
         title: 'Jom Share',
         debugShowCheckedModeBanner: false,
        initialRoute: '/',
-    
+
     routes: {
       '/': (context)=> splash(),
       '/login': (context)=> login(),
@@ -45,8 +46,9 @@ class MyApp extends StatelessWidget {
       '/forgetpass': (context)=>forgetpassword(),
       '/register/createProfile': (context)=>createProfile(),
       '/drivingProfile': (context)=>license(),
-    
+
+
     });
-    
+
   }
 }

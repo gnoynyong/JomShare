@@ -168,7 +168,7 @@ Padding(
                             }
                             else
                             {
-                              Navigator.pushNamed(context, '/home');
+                              Navigator.pushNamed(context, '/home',arguments: {'value':0});
                             }
                           }
 

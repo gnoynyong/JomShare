@@ -1,4 +1,5 @@
 // ignore_for_file: file_names, prefer_const_constructors, prefer_const_literals_to_create_immutables
+import 'package:getwidget/getwidget.dart';
 
 import 'package:address_search_field/address_search_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,6 +9,14 @@ import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:jomshare/constants.dart';
 import 'package:jomshare/screens/Manage/Offer.dart';
+import 'package:jomshare/screens/Manage/ViewOffer.dart';
+import 'package:flutter_google_places/flutter_google_places.dart';
+import 'package:address_search_field/address_search_field.dart';
+import 'package:location/location.dart';
+import 'package:google_api_headers/google_api_headers.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_webservice/places.dart';
+
 
 class editoffer extends StatefulWidget {
   const editoffer({ Key? key, required this.eoffer}) : super(key: key);
@@ -19,36 +28,97 @@ class editoffer extends StatefulWidget {
 }
 
 class _editofferState extends State<editoffer> {
-  
-  String ?cartype;
+    List <dynamic> Repeated_Day=['MON','TUE','WED','THU','FRI','SAT','SUN',];
+   late LatLng Offerpickup;
+    String repatedDay="";
+    var selectedDay;
+  late LatLng Offerdrop;
+  String cartype='';
+  String pooltype='';
+  final homeScaffoldKey = GlobalKey<ScaffoldState>();
+final searchScaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
 
+    LatLng _initialPositon=LatLng(3.140853,101.693207);
     final eoffer1=widget.eoffer;
     final String vtype=eoffer1.vehicletype;
+    pooltype=eoffer1.type;
+
     TextEditingController DT = TextEditingController(text: eoffer1.datetime);
     TextEditingController OpickupCtrl = TextEditingController(text: eoffer1.start);
     TextEditingController OdropCtrl = TextEditingController(text: eoffer1.destination);
-    
+
     TextEditingController PlateNo = TextEditingController(text: eoffer1.plateNo);
-    TextEditingController Price = TextEditingController(text: "RM "+eoffer1.price.toStringAsFixed(2));
+    TextEditingController Price = TextEditingController(text: eoffer1.price.toStringAsFixed(2));
+    GeoMethods geoMethod=GeoMethods(googleApiKey: 'AIzaSyDCiCFG1oGg-XSj_67K6UzsHNU5UP5AvZA', countryCode: 'MY', language: 'en');
+TextEditingController location=TextEditingController();
+
+  final geoMethods = GeoMethods(
+    /// [Get API key](https://developers.google.com/maps/documentation/embed/get-api-key)
+    googleApiKey: 'AIzaSyDCiCFG1oGg-XSj_67K6UzsHNU5UP5AvZA',
+    language: 'en',
+    countryCode: 'MY',
+  );
 
     CollectionReference carpooldb =
         FirebaseFirestore.instance.collection("carpool");
 
     Future<void> updateCarpool() {
+      if (selectedDay==null)
+      {
+        repatedDay=eoffer1.repeatedDay;
+      }
+      else
+      {
+         repatedDay=convertDaytoString(selectedDay);
+      }
+
+      print(repatedDay);
+      double temprice=double.parse(Price.text);
+      eoffer1.datetime=DT.text;
+      eoffer1.start=OpickupCtrl.text;
+      eoffer1.destination=OdropCtrl.text;
+      eoffer1.plateNo=PlateNo.text;
+      eoffer1.repeatedDay=repatedDay;
+      if (cartype=='')
+      {
+        cartype=eoffer1.vehicletype;
+      }
+      else
+      {
+        eoffer1.vehicletype=cartype;
+      }
+
+      eoffer1.price=temprice;
+      print(temprice);
       return carpooldb.doc(eoffer1.offerpoolid).update({
         'Date Time': DT.text,
         'Pickup address': OpickupCtrl.text,
         'Drop address': OdropCtrl.text,
+        'Plate no':PlateNo.text,
+        'Car type':cartype,
+        'Price': temprice,
+        'Repeated Day': repatedDay,
+
       }).then((value) => print("Carpool updated!"))
       .catchError((err)=>print("Failed: $err"));
     }
 
     var format = DateFormat("yyyy-MM-dd HH:mm");
+    print(Price);
     return Scaffold(
       // backgroundColor: Colors.grey[100],
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: ()
+          {
+
+            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=> viewoffer(voffer: eoffer1)));
+          },
+
+        ),
           title: const Text("Edit"),
           backgroundColor: lightpp),
       body: SingleChildScrollView(
@@ -61,7 +131,15 @@ class _editofferState extends State<editoffer> {
           //     width: 1,
           //   ),
           // ),
-          child: Column(
+          child: RouteSearchBox(
+      originCtrl: OpickupCtrl,
+      destinationCtrl: OdropCtrl,
+      geoMethods: geoMethods,
+      builder: (context, originBuilder, destinationBuilder,
+                waypointBuilder, waypointsMgr, relocate, getDirections) {
+              if (OpickupCtrl.text.isEmpty)
+                relocate(AddressId.origin, _initialPositon.toCoords());
+              return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Container(
@@ -141,6 +219,15 @@ class _editofferState extends State<editoffer> {
                     },
                   ),
                 ),
+
+                 SizedBox(
+                  height: 20.0,
+                ),
+                dropdowntitle(),
+                dropdown(),
+
+
+
                 SizedBox(
                   height: 20.0,
                 ),
@@ -155,6 +242,7 @@ class _editofferState extends State<editoffer> {
                     )
                   ],
                 ),
+
                 SizedBox(
                   height: 15.0,
                 ),
@@ -162,6 +250,23 @@ class _editofferState extends State<editoffer> {
                   children: [
                     Flexible(
                       child: TextFormField(
+                        onTap: () async
+                        {
+                           showDialog(
+                            context: context,
+                            builder: (context) => originBuilder.buildDefault(
+
+                              builder: AddressDialogBuilder(),
+                              onDone: (address) {
+
+                                return null;},
+                            ),
+                          );
+
+
+
+                        },
+                        maxLines: null,
                         controller: OpickupCtrl,
                         decoration: InputDecoration(
                           hintText: 'Enter Pick Up Location',
@@ -191,7 +296,21 @@ class _editofferState extends State<editoffer> {
                   children: [
                     Flexible(
                       child: TextFormField(
+                        maxLines: null,
                         controller: OdropCtrl,
+                        onTap: ()
+                        {
+                           showDialog(
+                            context: context,
+                            builder: (context) => destinationBuilder.buildDefault(
+
+                              builder: AddressDialogBuilder(),
+                              onDone: (address) {
+
+                                return null;},
+                            ),
+                          );
+                        },
                         decoration: InputDecoration(
                           hintText: 'Enter Drop Location',
                         ),
@@ -227,7 +346,7 @@ class _editofferState extends State<editoffer> {
                     Expanded(
                       flex: 1,
                       child: Text(
-                        "Price :",
+                        "Price (RM) :",
                         style: TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.bold,
@@ -252,12 +371,16 @@ class _editofferState extends State<editoffer> {
                         value: vtype,
                         onChanged: (value) {
                           setState(() {
-                            cartype=value;
+                            cartype=value!
+
+
+
+                            ;
                           });
                         },
                       ),
                     ),
-                    
+
                     SizedBox(width: 10.0,),
                     Expanded(
                       flex: 2,
@@ -272,6 +395,10 @@ class _editofferState extends State<editoffer> {
                     Expanded(
                       flex: 1,
                       child: TextFormField(
+                        keyboardType: TextInputType.numberWithOptions(
+                          decimal: true,
+                          signed: false,
+                        ),
                         controller: Price,
                         decoration: InputDecoration(
                           hintText: 'Enter Price',
@@ -310,6 +437,8 @@ class _editofferState extends State<editoffer> {
                 //     ),
                 //   ],
                 // ),
+
+
                 ElevatedButton(
                         style: ButtonStyle(
                           shadowColor: MaterialStateProperty.all(Colors.grey),
@@ -321,7 +450,9 @@ class _editofferState extends State<editoffer> {
                           ),
                         ),
                         onPressed: () {
+
                           updateCarpool();
+                          Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=> viewoffer(voffer: eoffer1)));
                         },
                         child: Wrap(
                           children: [
@@ -333,7 +464,98 @@ class _editofferState extends State<editoffer> {
             ),
           )
         ],
-      )),
-    );
+      );
+
+                 } ),
+    ));
   }
+  Widget dropdowntitle()
+  {
+    if (pooltype=="Frequent")
+    {
+      return  Row(
+                  children: [
+                    Text(
+                      "Repeated Days: ",
+                      style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey),
+                    )
+                  ],
+                );
+    }
+    else
+    {
+      return Center();
+    }
+  }
+    String convertDaytoString (List<dynamic> x)
+  {
+    List<String> temp=[];
+    for (int i=0;i<x.length;i++)
+    {
+      temp.add(x[i].toString());
+
+    }
+    temp.sort((a,b){
+      return a.compareTo(b);
+    });
+
+    String stringReturn='';
+    for (int m=0;m<temp.length;m++)
+    {
+      stringReturn=stringReturn+"/"+temp[m];
+    }
+    return stringReturn;
+
+  }
+  Widget dropdown ()
+  {
+    if (pooltype=="Frequent")
+    {
+return GFMultiSelect(
+      selected: true,
+      size: GFSize.SMALL,
+
+        items: Repeated_Day,
+        onSelect: (value) {
+          selectedDay=value;
+        },
+        dropdownTitleTileText: 'Repeated Days',
+        dropdownTitleTileColor: Colors.grey[200],
+        dropdownTitleTileMargin: EdgeInsets.only(
+            top: 22, left: 18, right: 18, bottom: 5),
+        dropdownTitleTilePadding: EdgeInsets.all(5),
+        dropdownUnderlineBorder: const BorderSide(
+            color: Colors.transparent, width: 2),
+        dropdownTitleTileBorder:
+        Border.all(color: Colors.black, width: 1),
+        dropdownTitleTileBorderRadius: BorderRadius.circular(5),
+        expandedIcon: const Icon(
+          Icons.keyboard_arrow_down,
+          color: Colors.black54,
+        ),
+        collapsedIcon: const Icon(
+          Icons.keyboard_arrow_up,
+          color: Colors.black54,
+        ),
+        submitButton: Text('OK'),
+        dropdownTitleTileTextStyle: const TextStyle(
+            fontSize: 15, color: Colors.black54),
+        padding: const EdgeInsets.fromLTRB(10, 0.5, 10, 0.5),
+        margin: const EdgeInsets.all(0.5),
+        type: GFCheckboxType.basic,
+        activeBgColor: Colors.green.withOpacity(0.6),
+
+
+      );
+    }
+    else
+    {
+      return Center();
+    }
+
+  }
+
 }

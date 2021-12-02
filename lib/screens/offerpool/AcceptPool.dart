@@ -6,32 +6,63 @@ import 'package:jomshare/screens/Manage/Offer.dart';
 import 'package:jomshare/screens/offerpool/Passenger.dart';
 import 'package:jomshare/screens/offerpool/PassengerCard.dart';
 
-class AcceptPool extends StatelessWidget {
+class AcceptPool extends StatefulWidget {
   AcceptPool({Key? key, required this.accept}) : super(key: key);
   final Offer accept;
+
+  @override
+  State<AcceptPool> createState() => _AcceptPoolState();
+}
+
+class _AcceptPoolState extends State<AcceptPool> {
   List<dynamic> requestlist = <dynamic>[];
+
+  bool _isloading=false;
 
   @override
   Widget build(BuildContext context) {
     final Stream<DocumentSnapshot> currentpool = FirebaseFirestore.instance
         .collection("carpool")
-        .doc(accept.offerpoolid)
+        .doc(widget.accept.offerpoolid)
         .snapshots();
 
     return Scaffold(
       appBar: AppBar(
         title: Text("Request"),
+        actions: [
+          IconButton(onPressed: (){
+              setState(() {
+
+              });
+          },
+          icon:Icon(Icons.cached_rounded))
+        ],
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: currentpool,
         builder:
             (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator();
+            }
           if (snapshot.hasError) {
             return Text("Something wrong");
           }
           if (snapshot.hasData) {
-            List<String> requestor = List.from(accept.requestid);
-            requestor.forEach((element) async {
+            print("YEs");
+             List<String> requestor = [];
+             requestor.clear();
+             print(widget.accept.requestid);
+              for (int m=0;m<widget.accept.requestid.length;m++)
+              {
+                requestor.add(widget.accept.requestid[m].toString());
+                print(m.toString()+":"+widget.accept.requestid[m].toString());
+                print("Requestor:${requestor}");
+              }
+              if (requestor.isNotEmpty)
+              {
+                print ('not empty');
+                 requestor.forEach((element) async {
               CollectionReference userdb =
                   FirebaseFirestore.instance.collection("user");
               DocumentReference user = userdb.doc(element);
@@ -39,18 +70,43 @@ class AcceptPool extends StatelessWidget {
               Passenger obj = new Passenger(
                   name: userdata.data()!["name"],
                   image: "assets/image/cat1.jpg");
-              requestlist.add(obj);
+                   bool check=false;
+            for (int p=0;p<requestor.length;p++)
+            {
+              check=false;
+              if (requestlist.length!=0)
+              {
+                check=true;
+                break;
+
+              }
+            }
+              !check?requestlist.add(obj):print('exist');
               print("list display");
               print(requestlist.length);
               print(requestlist[0].name);
             });
           }
-          return ListView.builder(
-            itemCount: requestlist.length,
-            itemBuilder: (context, index) =>
-                PassengerCard(psg: requestlist[index]),
+          print("Done");
+          return Container(
+
+            child: ListView.builder(
+              itemCount: requestlist.length,
+              itemBuilder: (context, index)
+              {
+
+               return  PassengerCard(psg: requestlist[index]);
+              }
+                  ,
+            ),
           );
-        },
+        }
+        else{
+          return Center(child: Text('No requestor'),);
+        }
+              }
+
+
       ),
     );
 

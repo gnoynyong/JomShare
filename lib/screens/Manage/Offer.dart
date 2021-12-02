@@ -1,10 +1,10 @@
 // ignore_for_file: file_names, non_constant_identifier_names
 
 class Offer {
-  final String datetime,start,destination,vehicletype,plateNo,type,repeatedDay,offerpoolid;
+   String datetime,start,destination,vehicletype,plateNo,type,repeatedDay,offerpoolid;
   // final List <String> pname,pimage;
-  final int price;
-  final List<String> requestid;
+   var price;
+   List<dynamic> requestid=[];
 
   Offer({
     // required this.time,
@@ -20,8 +20,14 @@ class Offer {
     required this.type,
     required this.repeatedDay,
     required this.offerpoolid,
-    required this.requestid,
+
   });
+  void addRequest (List <dynamic>requestid)
+  {
+    this.requestid=requestid;
+    print("test\n");
+    print(this.requestid);
+  }
 }
 
 
