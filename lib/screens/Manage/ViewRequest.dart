@@ -1,39 +1,65 @@
-// ignore_for_file: file_names, camel_case_types, prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:jomshare/constants.dart';
-import 'package:jomshare/model/carpool.dart';
-import 'package:jomshare/screens/Manage/EditOffer.dart';
-import 'package:jomshare/screens/Manage/OfferedBody.dart';
 import 'package:jomshare/screens/Manage/ViewHostPassenger.dart';
-import 'package:jomshare/screens/Manage/ViewPassenger.dart';
+import 'package:jomshare/model/carpool.dart';
+import 'package:jomshare/screens/Manage/requestBody.dart';
 import 'package:jomshare/screens/Manage/manageHome.dart';
 import 'package:jomshare/screens/home/home.dart';
-import 'package:jomshare/screens/offerpool/AcceptPool.dart';
 import 'package:jomshare/screens/welcome/components/body.dart';
 
 
+class ViewRequest extends StatefulWidget {
+  ViewRequest({Key? key, required this.vrequest}) : super(key: key);
 
-class viewoffer extends StatefulWidget {
-  viewoffer({Key? key, required this.voffer}) : super(key: key);
-
-  final CarpoolObject voffer;
+  final CarpoolObject vrequest;
 
   @override
-  State<viewoffer> createState() => _viewofferState();
+  State<ViewRequest> createState() => _ViewRequestState();
 }
 
-class _viewofferState extends State<viewoffer> {
+class _ViewRequestState extends State<ViewRequest> {
+  String uid=FirebaseAuth.instance.currentUser!.uid;
   CollectionReference carpooldb =
       FirebaseFirestore.instance.collection('carpool');
+  Future <void> cancelCarpool() async {
+    FirebaseFirestore.instance.collection("user").doc(FirebaseAuth.instance.currentUser!.uid).update(
+      {
+        'Requested carpools': FieldValue.arrayRemove([widget.vrequest.pooldocid])
+      }
+    );
+   DocumentSnapshot x= await carpooldb.doc(widget.vrequest.pooldocid).get();
+   List requestorID=x.data()!["requestList"];
+   List requestorStatus=x.data()!["requestStatus"];
+   int requestorIndex;
 
-  Future<void> deleteCarpool() {
-    FirebaseFirestore.instance.collection("user").doc(FirebaseAuth.instance.currentUser!.uid).update({'Offered carpools':FieldValue.arrayRemove([widget.voffer.pooldocid])});
-    return carpooldb.doc(widget.voffer.pooldocid).delete();
+
+   for (int m=0;m<requestorID.length;m++)
+   {
+     if (FirebaseAuth.instance.currentUser!.uid==requestorID[m])
+     {
+       requestorIndex=m;
+        requestorStatus[requestorIndex]="cancelled";
+     }
+   }
+    carpooldb.doc(widget.vrequest.pooldocid).set(
+      {
+        "requestStatus": FieldValue.delete(),
+
+      },SetOptions(merge: true)
+    );
+    carpooldb.doc(widget.vrequest.pooldocid).set(
+      {
+        "requestStatus": FieldValue.arrayUnion(requestorStatus),
+
+      },SetOptions(merge: true)
+    );
+
+
+
   }
-
   String convert(String x)
   {
     List day=['Mon','Tue','Wed','Thurs','Fri','Sat','Sun'];
@@ -60,9 +86,73 @@ class _viewofferState extends State<viewoffer> {
 
   }
 
-  @override
-  Widget build(BuildContext context) {
-    String countPassenger ()
+  Widget status()
+  {
+
+    int userindex=0;
+    bool checkexist=false;
+    String status="";
+    Color color=Colors.white;
+    for (int m=0;m< widget.vrequest.requestid.length;m++)
+    {
+      if (uid==widget.vrequest.requestid[m])
+      {
+        userindex=m;
+        checkexist=true;
+      }
+
+    }
+    if (checkexist)
+
+{
+  status=widget.vrequest.requeststatus[userindex];
+  switch (status)
+  {
+    case "pending": color=Colors.blue;break;
+    case "accepted": color=Colors.green;break;
+    case "rejected": color=Colors.red;break;
+  }
+  return   Row(children: [
+                  Expanded(
+                      flex: 1,
+                      child: Text(
+                        "Status :",
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey),
+                      ),
+                    ),
+                     Expanded(
+                      flex: 1,
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(2, 10, 2, 10),
+
+
+                        decoration: BoxDecoration(
+                          color:color ,
+                          borderRadius: BorderRadius.circular(20)
+
+
+                        ),
+                        child: Text(
+
+                          status.toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 17.5,color: Colors.white,fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+
+
+
+
+
+                ],);
+}
+return Center();
+  }
+  String countPassenger ()
  {
    int numpassenger=0;
 
@@ -70,49 +160,24 @@ class _viewofferState extends State<viewoffer> {
 
 
 
-   for (int m=0;m<widget.voffer.requestid.length;m++)
+   for (int m=0;m<widget.vrequest.requestid.length;m++)
    {
      print("yes");
-     if (widget.voffer.requeststatus[m]=="accepted")
+     if (widget.vrequest.requeststatus[m]=="accepted")
      {
-       requestUserId.add(widget.voffer.requestid[m]);
-       print(widget.voffer.requestid[m]);
+       requestUserId.add(widget.vrequest.requestid[m]);
+       print(widget.vrequest.requestid[m]);
        numpassenger++;
      }
 
 
    }
-   return (numpassenger).toString()+"/"+widget.voffer.seatno.toString();
+   return (numpassenger).toString()+"/"+widget.vrequest.seatno.toString();
 
  }
+  Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        icon: Icon(Icons.people),
-        onPressed: (){
-           Navigator.push(context,
-                    MaterialPageRoute(builder: (BuildContext context)
-                    =>ViewPassenger(request: widget.voffer))
-                    );
-
-        },
-        label:  Text(
-
-                        "View passengers",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16.0),
-                      ),),
-
-
-      // backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        actions: [
-          IconButton(onPressed: (){
-              setState(() {
-
-              });
-          },
-          icon:Icon(Icons.cached_rounded))
-        ],
         leading: IconButton(
           onPressed: ()
           {
@@ -122,53 +187,17 @@ class _viewofferState extends State<viewoffer> {
           icon: Icon(Icons.arrow_back),),
           title: const Text("View Detail Information"),
           backgroundColor: lightpp),
-      body: SingleChildScrollView(
-          // margin: const EdgeInsets.all(10.0),
-          // padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
-          // decoration: BoxDecoration(
-          //   color: Colors.white,
-          //   border: Border.all(
-          //     color: Colors.black12,
-          //     width: 1,
-          //   ),
-          // ),
-          child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Container(
-          //   padding: const EdgeInsets.only(left: 25.0, right: 25.0, top: 20.0 ),
-          //   color: Colors.blueGrey[800],
-          //   child: Column(
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       Text("Passenger :" ,style: TextStyle(fontSize: 17.5, color: Colors.white.withOpacity(0.85))),
-          //       ListView.builder(
-          //         shrinkWrap: true, //another solution is use expanded to warp all listview.builder but will use entire screen
-          //         padding: const EdgeInsets.all(10),
-          //         itemCount: voffer.pname.length,
-          //         itemBuilder:(context,index)=>
-          //         Container(
-          //           margin: EdgeInsets.only(bottom: 15.0),
-          //           child: Row(
-          //             mainAxisAlignment: MainAxisAlignment.start,
-          //             children: [
-          //               CircleAvatar(
-          //                 radius: 24,
-          //                 backgroundImage: AssetImage(voffer.pimage[index]),
-          //               ),
-          //               SizedBox(width: 10,),
-          //               Text(voffer.pname[index], style: TextStyle(fontSize: 17.5, color: Colors.white.withOpacity(0.85)) ),
-          //             ],
-          //           ),
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
-          Container(
+          body: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
             padding: const EdgeInsets.only(left: 25.0, right: 25.0, top: 20.0),
             child: Column(
               children: [
+                status(),
+
+                SizedBox(height: 20,),
                 Row(children: [
                   Expanded(
                       flex: 1,
@@ -183,7 +212,7 @@ class _viewofferState extends State<viewoffer> {
                     Expanded(
                       flex: 1,
                       child: Text(
-                        widget.voffer.type+" carpool",
+                        widget.vrequest.type+" carpool",
                         style: TextStyle(fontSize: 17.5),
                       ),
                     ),
@@ -191,7 +220,6 @@ class _viewofferState extends State<viewoffer> {
 
                 ],)
                 ,
-
                 SizedBox(height: 20,)
                 ,
                 Row(children: [
@@ -236,7 +264,7 @@ class _viewofferState extends State<viewoffer> {
                     ),
                     Expanded(
                       flex: 1,
-                      child: widget.voffer.type == "Frequent"
+                      child: widget.vrequest.type == "Frequent"
                           ? Text(
                               "Frequent Day: ",
                               style: TextStyle(
@@ -254,17 +282,17 @@ class _viewofferState extends State<viewoffer> {
                     Expanded(
                       flex: 1,
                       child: Text(
-                        widget.voffer.datetime,
+                        widget.vrequest.datetime,
                         style: TextStyle(fontSize: 17.5),
                       ),
                     ),
                     Expanded(
                       flex: 1,
-                      child: widget.voffer.type == "Frequent"
+                      child: widget.vrequest.type == "Frequent"
                           ? SizedBox(
                             width: 100,
                             child: Text(
-                                convert(widget.voffer.repeatedDay),
+                                convert(widget.vrequest.repeatedDay),
                                 style: TextStyle(fontSize: 17.5),
                               ),
                           )
@@ -298,7 +326,7 @@ class _viewofferState extends State<viewoffer> {
                     SizedBox(
                       width: 260,
                       child:  Text(
-                      widget.voffer.start,
+                      widget.vrequest.start,
                       style: TextStyle(fontSize: 17.5),
                     )
                     )
@@ -328,7 +356,7 @@ class _viewofferState extends State<viewoffer> {
                   children: [
                     SizedBox(width: 260,
                     child: Text(
-                      widget.voffer.destination,
+                      widget.vrequest.destination,
                       style: TextStyle(fontSize: 17.5),
                     ))
 
@@ -377,21 +405,21 @@ class _viewofferState extends State<viewoffer> {
                     Expanded(
                       flex: 2,
                       child: Text(
-                        widget.voffer.vehicletype,
+                        widget.vrequest.vehicletype,
                         style: TextStyle(fontSize: 17.5),
                       ),
                     ),
                     Expanded(
                       flex: 2,
                       child: Text(
-                        widget.voffer.plateNo,
+                        widget.vrequest.plateNo,
                         style: TextStyle(fontSize: 17.5),
                       ),
                     ),
                     Expanded(
                       flex: 1,
                       child: Text(
-                        "RM " + widget.voffer.price.toStringAsFixed(2),
+                        "RM " + widget.vrequest.price.toStringAsFixed(2),
                         style: TextStyle(fontSize: 17.5),
                       ),
                     ),
@@ -400,34 +428,6 @@ class _viewofferState extends State<viewoffer> {
                 SizedBox(
                   height: 15.0,
                 ),
-                // Row(
-                //   children: [
-                //     Expanded(
-                //       flex: 1,
-                //       child: Row(
-                //         children: [
-                //           Text("Contact: ", style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.grey),),
-                //           Text(voffer.contact, style: TextStyle(fontSize: 17.5),),
-                //         ],
-                //       )
-                //     ),
-                //     Expanded(
-                //       flex: 1,
-                //       child:
-                //         voffer.type=="Frequent"
-                //         ?
-                //         Row(
-                //           children: [
-                //             Text("Frequent Day: ", style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.grey),),
-                //             Text(voffer.repeatedDay, style: TextStyle(fontSize: 17.5),),
-                //           ],
-                //         )
-                //         :
-                //         Container(),
-                //     ),
-                //   ],
-                // ),
-
 
                 SizedBox(
                   height: 15.0,
@@ -445,53 +445,23 @@ class _viewofferState extends State<viewoffer> {
                     ),
                   ),
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => AcceptPool(accept: widget.voffer)),
+                    Navigator.push(context,
+                    MaterialPageRoute(builder: (BuildContext context)
+                    =>ViewHostPassenger(request: widget.vrequest,))
                     );
+
                   },
                   child: Wrap(
                     spacing: 10.0,
                     children: [
                       Icon(
-                        Icons.add_circle,
+                        Icons.people,
                         size: 20.0,
                       ),
                       Text(
-                        "View request",
-                        style: TextStyle(fontSize: 16.0),
-                      ),
-                    ],
-                  ),
-                ),
-                ElevatedButton(
-                  style: ButtonStyle(
-                    shadowColor: MaterialStateProperty.all(Colors.grey),
-                    overlayColor:
-                        MaterialStateProperty.all(Colors.blue[400]),
-                    shape: MaterialStateProperty.all(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => editoffer(eoffer: widget.voffer)),
-                    );
-                  },
-                  child: Wrap(
-                    spacing: 10.0,
-                    children: [
-                      Icon(
-                        Icons.edit,
-                        size: 20.0,
-                      ),
-                      Text(
-                        "Edit",
+
+                        "View host and \npassengers",
+                        textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 16.0),
                       ),
                     ],
@@ -514,13 +484,13 @@ class _viewofferState extends State<viewoffer> {
                     builder: (context)
                     {
                       return AlertDialog(
-                        title: Text('Delete Carpool'),
-                        content: Text("Are you sure to delete this carpool?"),
+                        title: Text('Cancel Requested Carpool Confirmation'),
+                        content: Text("Are you sure to cancel this requested carpool?"),
                         actions: [
                           TextButton(
               onPressed: () {
-                deleteCarpool();
-                 Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>Home()));
+                cancelCarpool();
+                Navigator.popUntil(context, ModalRoute.withName('/home'));
 
               },
               child: const Text('Yes'),
@@ -535,28 +505,32 @@ class _viewofferState extends State<viewoffer> {
 
                       );
                     });
-
-
-                  },
+                    },
                   child: Wrap(
                     spacing: 10.0,
                     children: [
                       Icon(
-                        Icons.delete,
+                        Icons.cancel,
                         size: 20.0,
                       ),
                       Text(
-                        "Delete",
+                        "Cancel request",
                         style: TextStyle(fontSize: 16.0),
                       ),
                     ],
                   ),
                 )
+
+
               ],
             ),
           )
-        ],
-      )),
+
+              ],
+
+            ),
+          ),
+
     );
   }
 }

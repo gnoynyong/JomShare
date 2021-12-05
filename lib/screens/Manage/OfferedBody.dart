@@ -5,7 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:jomshare/constants.dart';
-import 'package:jomshare/screens/Manage/Offer.dart';
+
+import 'package:jomshare/model/carpool.dart';
 import 'package:jomshare/screens/welcome/components/background.dart';
 import 'package:jomshare/screens/welcome/components/body.dart';
 
@@ -20,7 +21,7 @@ class OfferedBody extends StatefulWidget {
 
 class _OfferedBodyState extends State<OfferedBody> {
   bool _isloading=false;
-  List<Offer> carpoolist = <Offer>[];
+  List<CarpoolObject> carpoolist = <CarpoolObject>[];
   final Stream<DocumentSnapshot> userdoc = FirebaseFirestore.instance
       .collection('user')
       .doc(FirebaseAuth.instance.currentUser!.uid)
@@ -47,6 +48,12 @@ class _OfferedBodyState extends State<OfferedBody> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Text("Loading..");
         }
+         if (!snapshot.data!.data()!.containsKey("Offered carpools"))
+          {
+
+            return Center(child: Text('No carpool has been offered yet!',style: TextStyle(fontSize: 20),));
+
+          }
         List temp=snapshot.data!["Offered carpools"];
         if (temp.length==0)
         {
@@ -89,7 +96,7 @@ class _OfferedBodyState extends State<OfferedBody> {
              print(cds.data()!["Pool type"]);
              print(cds.data()!["Repeated Day"]);
 
-            Offer offerpool = new Offer(
+            CarpoolObject offerpool = new CarpoolObject(
               datetime: cds.data()!["Date Time"],
               start: cds.data()!["Pickup address"],
               destination: cds.data()!["Drop address"],
@@ -98,12 +105,14 @@ class _OfferedBodyState extends State<OfferedBody> {
               price: cds.data()!["Price"],
               type: cds.data()!["Pool type"],
               repeatedDay: cds.data()!["Repeated Day"],
-              offerpoolid: element,
+              pooldocid: element,
+              seatno: cds.data()!["Seat"],
+              hostid:  cds.data()!["Host ID"]
 
             );
             if (cds.data()!["requestList"]!=null)
             {
-              offerpool.addRequest(cds.data()!["requestList"]);
+              offerpool.addRequestIDWithStatus(cds.data()!["requestList"],cds.data()!["requestStatus"]);
               print("RequestID: ${offerpool.requestid}");
             }
 
@@ -114,7 +123,7 @@ class _OfferedBodyState extends State<OfferedBody> {
             for (int p=0;p<carpoolist.length;p++)
             {
               check=false;
-              if (carpoolist[p].offerpoolid==offerpool.offerpoolid)
+              if (carpoolist[p].pooldocid==offerpool.pooldocid)
               {
                 check=true;
                 listindex=p;

@@ -42,6 +42,7 @@ CollectionReference user = FirebaseFirestore.instance.collection('user');
 
 
 
+
     }
  ).then((value) => print("User Added"))
           .catchError((error) => print("Failed to add user: $error"));
@@ -82,6 +83,7 @@ CollectionReference user = FirebaseFirestore.instance.collection('user');
 
 
   }
+
   Future <void> addCarpoolToUser(String carpoolId) async
   {
     user.doc(uid).update(
@@ -90,6 +92,17 @@ CollectionReference user = FirebaseFirestore.instance.collection('user');
       }
     ).then((value) => print("Offer carpools added to user"))
           .catchError((error) => print("Failed to add carpool into user: $error"));
+
+
+  }
+  Future <void> addRequestCarpoolToUser(String carpoolId) async
+  {
+    user.doc(uid).update(
+      {
+          'Requested carpools':FieldValue.arrayUnion([carpoolId]),
+      }
+    ).then((value) => print("Request carpools added to user"))
+          .catchError((error) => print("Failed to add request carpool into user: $error"));
 
 
   }

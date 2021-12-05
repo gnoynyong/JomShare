@@ -16,7 +16,7 @@ class CarpoolService
 
 
   Future <void> offerCarpool (String pickup,String drop, String seat, String cartype, String pooltype,String plateno, String price,
-  LatLng pickupLocation, LatLng dropLocation,String DT,String selectedday) async
+  LatLng pickupLocation, LatLng dropLocation,String DT,String selectedday,String hostID) async
   {
 
     docid=carpool.doc().id;
@@ -35,6 +35,8 @@ class CarpoolService
         'Drop coor': GeoPoint(dropLocation.latitude,dropLocation.longitude),
         'Date Time': DT,
         'Repeated Day': selectedday,
+        'Host ID': hostID,
+
 
 
 
