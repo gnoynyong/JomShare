@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:jomshare/constants.dart';
 import 'package:flutter/widgets.dart';
 import 'package:jomshare/screens/Manage/OfferedBody.dart';
-import 'package:jomshare/screens/Manage/body_request.dart';
+
+import 'package:jomshare/screens/Manage/requestBody.dart';
 class manageHome extends StatefulWidget {
 
 
@@ -63,7 +64,7 @@ void initState() {
         body: TabBarView(
         controller: _controller,
         children: <Widget>[
-            bodyRequest(),
+            requestBody(),
             OfferedBody(),
 
         ],

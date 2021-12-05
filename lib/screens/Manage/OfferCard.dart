@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:jomshare/screens/Manage/ViewOffer.dart';
 
-import 'Offer.dart';
+import 'package:jomshare/model/carpool.dart';
 
 class OfferCard extends StatelessWidget {
   const OfferCard({
@@ -12,7 +12,8 @@ class OfferCard extends StatelessWidget {
     required this.press,
   }) : super(key: key);
 
-  final Offer offer;
+  final CarpoolObject
+   offer;
   final VoidCallback press;
 
   @override

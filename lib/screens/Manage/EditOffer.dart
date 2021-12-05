@@ -8,7 +8,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:jomshare/constants.dart';
-import 'package:jomshare/screens/Manage/Offer.dart';
+
+import 'package:jomshare/model/carpool.dart';
 import 'package:jomshare/screens/Manage/ViewOffer.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:address_search_field/address_search_field.dart';
@@ -21,7 +22,8 @@ import 'package:google_maps_webservice/places.dart';
 class editoffer extends StatefulWidget {
   const editoffer({ Key? key, required this.eoffer}) : super(key: key);
 
-  final Offer eoffer;
+  final CarpoolObject eoffer;
+
 
   @override
   _editofferState createState() => _editofferState();
@@ -37,22 +39,35 @@ class _editofferState extends State<editoffer> {
   String pooltype='';
   final homeScaffoldKey = GlobalKey<ScaffoldState>();
 final searchScaffoldKey = GlobalKey<ScaffoldState>();
+ TextEditingController DT = TextEditingController();
+    TextEditingController OpickupCtrl = TextEditingController( );
+    TextEditingController OdropCtrl = TextEditingController();
+
+    TextEditingController PlateNo = TextEditingController();
+    TextEditingController Price = TextEditingController();
+void initState()
+{
+  DT.text=widget.eoffer.datetime;
+  OpickupCtrl.text=widget.eoffer.start;
+  OdropCtrl.text=widget.eoffer.destination;
+  PlateNo.text=widget.eoffer.plateNo;
+  Price.text=widget.eoffer.price.toStringAsFixed(2);
+}
   @override
   Widget build(BuildContext context) {
 
     LatLng _initialPositon=LatLng(3.140853,101.693207);
-    final eoffer1=widget.eoffer;
+    CarpoolObject eoffer1=widget.eoffer;
+
     final String vtype=eoffer1.vehicletype;
     pooltype=eoffer1.type;
 
-    TextEditingController DT = TextEditingController(text: eoffer1.datetime);
-    TextEditingController OpickupCtrl = TextEditingController(text: eoffer1.start);
-    TextEditingController OdropCtrl = TextEditingController(text: eoffer1.destination);
 
-    TextEditingController PlateNo = TextEditingController(text: eoffer1.plateNo);
-    TextEditingController Price = TextEditingController(text: eoffer1.price.toStringAsFixed(2));
+
     GeoMethods geoMethod=GeoMethods(googleApiKey: 'AIzaSyDCiCFG1oGg-XSj_67K6UzsHNU5UP5AvZA', countryCode: 'MY', language: 'en');
 TextEditingController location=TextEditingController();
+
+
 
   final geoMethods = GeoMethods(
     /// [Get API key](https://developers.google.com/maps/documentation/embed/get-api-key)
@@ -92,7 +107,7 @@ TextEditingController location=TextEditingController();
 
       eoffer1.price=temprice;
       print(temprice);
-      return carpooldb.doc(eoffer1.offerpoolid).update({
+      return carpooldb.doc(eoffer1.pooldocid).update({
         'Date Time': DT.text,
         'Pickup address': OpickupCtrl.text,
         'Drop address': OdropCtrl.text,
@@ -115,7 +130,9 @@ TextEditingController location=TextEditingController();
           onPressed: ()
           {
 
-            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=> viewoffer(voffer: eoffer1)));
+
+
+            Navigator.pop(context);
           },
 
         ),
@@ -194,8 +211,11 @@ TextEditingController location=TextEditingController();
                 Align(
                   alignment: Alignment.centerLeft,
                   child: DateTimeField(
+
+
                     controller: DT,
                     decoration: InputDecoration(
+
                         border: OutlineInputBorder(),
                         constraints:
                             BoxConstraints(maxWidth: 200.0, maxHeight: 50.0)),
@@ -250,6 +270,8 @@ TextEditingController location=TextEditingController();
                   children: [
                     Flexible(
                       child: TextFormField(
+
+
                         onTap: () async
                         {
                            showDialog(
@@ -370,7 +392,11 @@ TextEditingController location=TextEditingController();
                         }).toList(),
                         value: vtype,
                         onChanged: (value) {
+
+
                           setState(() {
+
+
                             cartype=value!
 
 

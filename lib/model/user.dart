@@ -13,15 +13,16 @@ class CUser
 
 }
 
-class CUserData
+class UserData
 {
-  String uid,name,icNo,gender,phone,occupation;
-  bool license;
-  String licenseType;
+  String uid="",name="",icNo="",gender="",phone="",occupation="",address="",imageurl="";
+  bool license=false,haveCar=false;
+  String licenseType="";
   double averageRating=0;
-  List offered=[];
+  int age=0;
+  UserData();
 
-  CUserData({
+  UserData.set({
     required this.uid,
     required this.name,
     required this.icNo,
@@ -29,7 +30,11 @@ class CUserData
     required this.phone,
     required this.occupation,
     required this.license,
-    required this.licenseType
+    required this.licenseType,
+    required this.address,
+    required this.imageurl,
+    required this.haveCar,
+    required this.age,
   });
 
 
