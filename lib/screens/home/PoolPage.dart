@@ -724,11 +724,14 @@ class _PoolpageState extends State<Poolpage> {
                   ),
                 ),
               ),
-              new Container(
-                padding: const EdgeInsets.only(left: 150.0, top: 40.0),
-                child: new RaisedButton(
-                  child: const Text('Find Pool'),
-                  onPressed: () async {
+              Center(
+                child: SmallRoundButton(
+                  text: 'Find Pool',
+                   bckcolor: darkblue,
+                        textColor: Colors.white,
+                         btnstyle: TextStyle(fontSize: 15.0),
+
+                  press: () async {
                     if (FpickupCtrl.text == '' || FdropCtrl.text == '') {
                       showDialog(
                         context: context,
@@ -801,7 +804,7 @@ class _PoolpageState extends State<Poolpage> {
 
                     }
                   },
-                )
+                ),
               ),
             ],
           );
