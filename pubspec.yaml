@@ -41,6 +41,7 @@ dependencies:
   cloud_firestore: ^1.0.4
   firebase_storage: ^10.1.0
   provider: ^6.0.1
+  string_similarity: ^2.0.0
 
   flutter_google_places: ^0.3.0
   google_maps_flutter: ^2.0.1

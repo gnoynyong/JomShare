@@ -30,7 +30,7 @@ class CarpoolService
         'Car type': cartype,
         'Pool type': pooltype,
         'Plate no': plateno,
-        'Price': int.parse(price),
+        'Price': double.parse(price),
         'Pickup coor': GeoPoint(pickupLocation.latitude,pickupLocation.longitude),
         'Drop coor': GeoPoint(dropLocation.latitude,dropLocation.longitude),
         'Date Time': DT,

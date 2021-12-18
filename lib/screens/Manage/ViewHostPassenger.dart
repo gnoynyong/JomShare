@@ -1,4 +1,6 @@
 
+// ignore_for_file: file_names, unnecessary_new
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -81,8 +83,7 @@ List <UserData> passengerlist=<UserData>[];
 
               if (snapshotx.connectionState==ConnectionState.waiting)
               {
-   return CircularProgressIndicator();
-
+                return CircularProgressIndicator();
               }
               if (snapshotx.hasError) {
             return Text("Something wrong");
@@ -93,7 +94,7 @@ List <UserData> passengerlist=<UserData>[];
 
           }
           QuerySnapshot? QS=snapshotx.data;
-               print(QS);
+              print(QS);
               int docnum=QS!.size;
           List<QueryDocumentSnapshot>temp=QS.docs;
           int count=0;
@@ -176,99 +177,71 @@ List <UserData> passengerlist=<UserData>[];
 
 
 
-                                     if (passengerlist!=null&&passengerlist.length!=0)
-                                     {
-                                       for (int g=0;g<passengerlist.length;g++)
-                                       {
-                                         check=false;
-                                         if(userobj.uid==passengerlist[g].uid)
-                                         {
-                                           check=true;
-                                           listindex=g;
-                                           break;
-                                         }
-
-                                       }
-                                       if(check)
-                                       {
-                                         passengerlist.removeAt(listindex);
-                                         passengerlist.insert(listindex, userobj);
-                                       }
-                                       else
-                                       {
-                                         passengerlist.add(userobj);
-                                       }
-
-
-                                     }
-                                     else
-                                     {
-                                       passengerlist.add(userobj);
-                                         print("passenger added");
-
-                                     }
-
+                        if (passengerlist!=null&&passengerlist.length!=0)
+                        {
+                          for (int g=0;g<passengerlist.length;g++)
+                          {
+                            check=false;
+                            if(userobj.uid==passengerlist[g].uid)
+                            {
+                              check=true;
+                              listindex=g;
+                              break;
+                            }
+                          }
+                          if(check)
+                          {
+                            passengerlist.removeAt(listindex);
+                            passengerlist.insert(listindex, userobj);
+                          }
+                          else
+                          {
+                            passengerlist.add(userobj);
+                          }
+                        }
+                        else
+                        {
+                          passengerlist.add(userobj);
+                          print("passenger added");
+                        }
+                      }
+                      else{
+                        bool checkexist=false;
+                        int listindex=0;
+                        for (int g=0;g<passengerlist.length;g++){
+                          checkexist=false;
+                          if(temp.elementAt(y).id==passengerlist[g].uid){
+                            checkexist=true;
+                            listindex=g;
+                            break;
+                          }
+                        }
+                        if (checkexist){
+                          passengerlist.removeAt(listindex);
+                        }
+                      }
                     }
-                    else
-                    {
-                      bool checkexist=false;
-            int listindex=0;
-             for (int g=0;g<passengerlist.length;g++)
-                                       {
-                                         checkexist=false;
-                                         if(temp.elementAt(y).id==passengerlist[g].uid)
-                                         {
-                                           checkexist=true;
-                                           listindex=g;
-                                           break;
-                                         }
-
-                                       }
-                                    if (checkexist)
-                                    {
-                                       passengerlist.removeAt(listindex);
-
-                                    }
-
-
-                    }
-
                   }
                 }
-
-
-
-              }}
-
-
-               return
-                 ListView(
-                   children: [
-                     Card(
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>ViewUserProfile(user: host)));
-
-                            },
-                            child: ListTile(
-                              leading: Image.network(host.imageurl),
-
-
-                              title: Text("Host",style:TextStyle(fontWeight: FontWeight.bold)),
-                                subtitle: Text(host.name),
-
-                            ),
-                          )
-                          ,
-
-                        )
-                     ,
-                     !requestlistExist?Center():ConstrainedBox(
-                   constraints: BoxConstraints(maxHeight: 1000),
-                   child:  ListView.builder(
-                    shrinkWrap: true,
-
-
+              }
+              return ListView(
+                children: [
+                  Card(
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>ViewUserProfile(user: host)));
+                      },
+                      child: ListTile(
+                        leading: Image.network(host.imageurl),
+                        title: Text("Host",style:TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Text(host.name),
+                      ),
+                    ),
+                  ),
+                  !requestlistExist?Center():ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: 1000),
+                    child:  ListView.builder(
+                      shrinkWrap: true,
                       itemCount: passengerlist.length,
                       itemBuilder: (context,index)
                       {
@@ -276,39 +249,23 @@ List <UserData> passengerlist=<UserData>[];
                           child: InkWell(
                             onTap: () {
                                 Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>ViewUserProfile(user: passengerlist[index])));
-
-
                             },
                             child: ListTile(
                               leading: Image.network(passengerlist[index].imageurl),
                               title: Text("Passenger",style:TextStyle(fontWeight: FontWeight.bold)),
-
                               subtitle: Text(passengerlist[index].name),
-
                             ),
-                          )
-                          ,
-
+                          ),
                         );
-
                       }
-                      ),
-
-
-                   )
-                   ],
-                 );
-
-
-
-
+                    ),
+                  )
+                ],
+              );
             }
-            );
-
-
-            }
-
-          )
+          );
+        }
+      )
     );
   }
 }

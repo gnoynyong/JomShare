@@ -39,7 +39,7 @@ class _viewofferState extends State<viewoffer> {
     List day=['Mon','Tue','Wed','Thurs','Fri','Sat','Sun'];
     List <String> daylist=x.substring(1).split('/');
     print(daylist);
-   String temp="";
+    String temp="";
 
     for (int z =0;z<daylist.length;z++)
     {
@@ -50,14 +50,10 @@ class _viewofferState extends State<viewoffer> {
           temp=temp+"-"+day[m];
         }
       }
-
-
-
     }
     temp=temp.substring(1);
     print (temp);
     return temp;
-
   }
 
   @override
@@ -107,21 +103,19 @@ class _viewofferState extends State<viewoffer> {
       appBar: AppBar(
         actions: [
           IconButton(onPressed: (){
-              setState(() {
-
-              });
-          },
-          icon:Icon(Icons.cached_rounded))
+            setState(() {});},
+            icon:Icon(Icons.cached_rounded)
+          )
         ],
         leading: IconButton(
-          onPressed: ()
-          {
+          onPressed: (){
             Navigator.popUntil(context, ModalRoute.withName('/home'));
-
           },
-          icon: Icon(Icons.arrow_back),),
-          title: const Text("View Detail Information"),
-          backgroundColor: lightpp),
+          icon: Icon(Icons.arrow_back),
+        ),
+        title: const Text("View Detail Information"),
+        backgroundColor: lightpp
+      ),
       body: SingleChildScrollView(
           // margin: const EdgeInsets.all(10.0),
           // padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
