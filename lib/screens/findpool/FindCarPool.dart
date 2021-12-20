@@ -9,6 +9,7 @@ import 'package:jomshare/constants.dart';
 import 'package:jomshare/model/carpool.dart';
 import 'package:jomshare/model/user.dart';
 import 'package:jomshare/screens/Profile/ViewUserProfile.dart';
+
 import 'package:string_similarity/string_similarity.dart';
 
 class findcarpool extends StatefulWidget {
@@ -35,8 +36,96 @@ class _findcarpoolState extends State<findcarpool> {
   List <int> newrequestListCQSIndex = [];
   List <CarpoolObject> carpoollist = [];
   List <UserData> user = [];
+String? gender = "Any";
+  RangeValues _currentRangeValues = const RangeValues(0,150);
+  String? poolType = "Any";
 
+  bool _isFilter=false;
+  List<CarpoolObject> filterCarpoolList=[];
+  List <UserData> filteruser = [];
+  List <int> filternumaccept=[];
   final Stream<QuerySnapshot> queryCarpool = FirebaseFirestore.instance.collection("carpool").snapshots();
+   Future<void>filterCarpool()async{
+     filterCarpoolList.clear();
+     filternumaccept.clear();
+     filteruser.clear();
+    filterCarpoolList=carpoollist;
+
+
+    if (gender!="Any")
+    {
+        List<int> findGenderIndex=[];
+
+          List <CarpoolObject> templist=[];
+        for (int q=0;q<filterCarpoolList.length;q++)
+        {
+          for (int h=0;h<user.length;h++)
+          {
+            if (filterCarpoolList[q].hostid==user[h].uid)
+            {
+               print(user[h].name);
+              print(gender);
+              print(user[h].gender);
+
+              if (gender==user[h].gender)
+              {
+                findGenderIndex.add(q);
+                break;
+              }
+            }
+          }
+        }
+        for (int f=0;f<findGenderIndex.length;f++)
+        {
+          templist.add(filterCarpoolList[findGenderIndex[f]]);
+
+        }
+        filterCarpoolList=templist;
+
+    }
+
+    if (poolType!="Any")
+    {
+        filterCarpoolList=filterCarpoolList.where((element) => element.type==poolType).toList();
+
+    }
+    print("A");
+    filterCarpoolList=filterCarpoolList.where((element) => element.price>=_currentRangeValues.start&&element.price<=_currentRangeValues.end).toList();
+    print("B");
+    filterCarpoolList.forEach((element) {
+          for (int x=0;x<user.length;x++)
+          {
+            if (element.hostid==user[x].uid)
+            {
+
+              filteruser.add(user[x]);
+              print("x:"+x.toString());
+              print("name: "+user[x].name);
+              break;
+            }
+          }
+        });
+
+    for (int b=0;b<filterCarpoolList.length;b++)
+    {
+       int passengercount=0;
+      if (filterCarpoolList[b].requestid.length==filterCarpoolList[b].requeststatus.length)
+      {
+        for (int k=0;k<filterCarpoolList[b].requestid.length;k++)
+      {
+        if(filterCarpoolList[b].requeststatus[k]=="accepted")
+        {
+          passengercount++;
+        }
+      }
+
+      }
+      print("counter:" +passengercount.toString());
+      filternumaccept.add(passengercount);
+
+    }
+  }
+
   String convert(String x)
   {
     List day=['Mon','Tue','Wed','Thurs','Fri','Sat','Sun'];
@@ -218,12 +307,12 @@ class _findcarpoolState extends State<findcarpool> {
     }
   }
 
-  bool validation(QuerySnapshot CQS, QuerySnapshot UQS, int index)
+  bool validation(List <CarpoolObject> x, int index)
   {
     bool containRequestList=false;
-    for (int i = 0; i < carpoollist[index].requestid.length; i++)
+    for (int i = 0; i < x[index].requestid.length; i++)
     {
-      if(carpoollist[index].requestid[i]==uid)
+      if(x[index].requestid[i]==uid)
       {
         containRequestList=true;
         break;
@@ -234,22 +323,22 @@ class _findcarpoolState extends State<findcarpool> {
     return containRequestList;
   }
 
-  Widget requestStatus(QuerySnapshot CQS, QuerySnapshot UQS, int index)
+  Widget requestStatus(List <CarpoolObject> x, int index)
   {
     int requestStatusIndex = 0;
     String status="";
     Color buttonColor = Colors.white;
     String word="";
-    for (int i = 0; i < carpoollist[index].requestid.length; i++)
+    for (int i = 0; i < x[index].requestid.length; i++)
     {
-      if(carpoollist[index].requestid[i]==uid)
+      if(x[index].requestid[i]==uid)
       {
         requestStatusIndex = i;
         break;
       }
     }
 
-    status=carpoollist[index].requeststatus[requestStatusIndex];
+    status=x[index].requeststatus[requestStatusIndex];
     switch (status)
     {
       case "pending":
@@ -317,6 +406,7 @@ class _findcarpoolState extends State<findcarpool> {
 
           QuerySnapshot? CQS = snapshot.data;
           int Csize = CQS!.size;
+          print(Csize);
           List<QueryDocumentSnapshot>temp=CQS.docs;
 
           if(snapshot.hasData)
@@ -324,12 +414,40 @@ class _findcarpoolState extends State<findcarpool> {
             carpoollist.clear();
             for(int i=0;i<Csize;i++)
             {
+              int lengthStart=CQS.docs.elementAt(i).data()["Pickup address"].toString().length;
+              int lengthDestination=CQS.docs.elementAt(i).data()["Pickup address"].toString().length;
+              double percentageStart,percentageDestination;
+              if (lengthStart<30)
+              {
+                percentageStart=0.7;
+              }
+              else if(lengthStart>=30&&lengthStart<60)
+              {
+                percentageStart=0.5;
+              }
+              else
+              {
+                percentageStart=0.3;
+              }
+              if (lengthDestination<30)
+              {
+                percentageDestination=0.7;
+              }
+              else if(lengthDestination>=30&&lengthDestination<60)
+              {
+                percentageDestination=0.5;
+              }
+              else
+              {
+                percentageDestination=0.3;
+              }
+
               if((CQS.docs.elementAt(i).data()["Pickup address"]).toString().contains(widget.start) || widget.start.contains(CQS.docs.elementAt(i).data()["Pickup address"]))
               {
+                print(1);
                 if((CQS.docs.elementAt(i).data()["Drop address"]).toString().contains(widget.destination) || widget.destination.contains(CQS.docs.elementAt(i).data()["Drop address"]))
                 {
-                  // print(CQS.docs.elementAt(i).data()["Pickup address"]);
-                  // print(CQS.docs.elementAt(i).data()["Drop address"]);
+             print(2);
                   CarpoolObject obj = new CarpoolObject(
                     hostid: temp.elementAt(i).data()["Host ID"],
                     datetime: temp.elementAt(i).data()["Date Time"],
@@ -350,62 +468,15 @@ class _findcarpoolState extends State<findcarpool> {
                   }
                   carpoollist.add(obj);
 
-                  // bool repeat=false;
-                  // int listindex=0;
-                  // for (int i = 0; i < carpoollist.length; i++)
-                  // {
-                  //   repeat=false;
-                  //   // print("carpool");
-                  //   // print(i);
-                  //   if(obj.pooldocid==carpoollist[i].pooldocid)
-                  //   {
-                  //     // print("Find same");
-                  //     repeat=true;
-                  //     break;
-                  //   }
-                  // }
-                  // if(repeat==false)
-                  // {
-                  //   // print("Add carpool");
-                  //   carpoollist.add(obj);
-                  // }
 
-
-                  // bool check=false;
-                  // int listindex=0;
-                  // if (carpoollist!=null&&carpoollist.length!=0)
-                  // {
-                  //   for (int g=0;g<carpoollist.length;g++)
-                  //   {
-                  //     check=false;
-                  //     if(obj.pooldocid==carpoollist[g].pooldocid)
-                  //     {
-                  //       check=true;
-                  //       listindex=g;
-                  //       break;
-                  //     }
-                  //   }
-                  //   if(check)
-                  //   {
-                  //     carpoollist.removeAt(listindex);
-                  //     carpoollist.insert(listindex, obj);
-                  //   }
-                  //   else
-                  //   {
-                  //     carpoollist.add(obj);
-                  //   }
-                  // }
-                  // else
-                  // {
-                  //   carpoollist.add(obj);
-                  //   print("carpool added");
-                  // }
                 }
 
                 else
                 {
-                  if(widget.start.similarityTo(CQS.docs.elementAt(i).data()["Pickup address"])>0.7 && widget.destination.similarityTo(CQS.docs.elementAt(i).data()["Drop address"])>0.7)
+                  print(3);
+                  if(widget.start.similarityTo(CQS.docs.elementAt(i).data()["Pickup address"])>percentageStart && widget.destination.similarityTo(CQS.docs.elementAt(i).data()["Drop address"])>percentageDestination)
                   {
+                    print(4);
                     CarpoolObject obj = new CarpoolObject(
                       hostid: temp.elementAt(i).data()["Host ID"],
                       datetime: temp.elementAt(i).data()["Date Time"],
@@ -419,62 +490,16 @@ class _findcarpoolState extends State<findcarpool> {
                       pooldocid: temp.elementAt(i).id,
                       seatno: temp.elementAt(i).data()["Seat"]
                     );
-                    if (CQS.docs.elementAt(i).data()["requestList"]!=null)
+                    print("x");
+                    if (CQS.docs.elementAt(i).data().containsKey("requestList"))
                     {
                       obj.addRequestIDWithStatus(CQS.docs.elementAt(i).data()["requestList"],CQS.docs.elementAt(i).data()["requestStatus"]);
-                      // print("RequestID: ${obj.requestid}");
+                      print("y");
                     }
                     carpoollist.add(obj);
+                     print("z");
 
-                    // bool repeat=false;
-                    // int listindex=0;
-                    // for (int i = 0; i < carpoollist.length; i++)
-                    // {
-                    //   repeat=false;
-                    //   // print("carpool");
-                    //   // print(i);
-                    //   if(obj.pooldocid==carpoollist[i].pooldocid)
-                    //   {
-                    //     // print("Find same");
-                    //     repeat=true;
-                    //     break;
-                    //   }
-                    // }
-                    // if(repeat==false)
-                    // {
-                    //   // print("Add carpool");
-                    //   carpoollist.add(obj);
-                    // }
 
-                    // bool check=false;
-                    // int listindex=0;
-                    // if (carpoollist!=null&&carpoollist.length!=0)
-                    // {
-                    //   for (int g=0;g<carpoollist.length;g++)
-                    //   {
-                    //     check=false;
-                    //     if(obj.pooldocid==carpoollist[g].pooldocid)
-                    //     {
-                    //       check=true;
-                    //       listindex=g;
-                    //       break;
-                    //     }
-                    //   }
-                    //   if(check)
-                    //   {
-                    //     carpoollist.removeAt(listindex);
-                    //     carpoollist.insert(listindex, obj);
-                    //   }
-                    //   else
-                    //   {
-                    //     carpoollist.add(obj);
-                    //   }
-                    // }
-                    // else
-                    // {
-                    //   carpoollist.add(obj);
-                    //   print("carpool added");
-                    // }
                   }
                 }
 
@@ -482,8 +507,10 @@ class _findcarpoolState extends State<findcarpool> {
 
               else
               {
-                if(widget.start.similarityTo(CQS.docs.elementAt(i).data()["Pickup address"])>0.7 && widget.destination.similarityTo(CQS.docs.elementAt(i).data()["Drop address"])>0.7)
+                print(5);
+                if(widget.start.similarityTo(CQS.docs.elementAt(i).data()["Pickup address"])>percentageStart && widget.destination.similarityTo(CQS.docs.elementAt(i).data()["Drop address"])>percentageDestination)
                 {
+                  print(6);
                   CarpoolObject obj = new CarpoolObject(
                     hostid: temp.elementAt(i).data()["Host ID"],
                     datetime: temp.elementAt(i).data()["Date Time"],
@@ -504,55 +531,7 @@ class _findcarpoolState extends State<findcarpool> {
                   }
                   carpoollist.add(obj);
 
-                  // bool repeat=false;
-                  // int listindex=0;
-                  // for (int i = 0; i < carpoollist.length; i++)
-                  // {
-                  //   repeat=false;
-                  //   // print("carpool");
-                  //   // print(i);
-                  //   if(obj.pooldocid==carpoollist[i].pooldocid)
-                  //   {
-                  //     // print("Find same");
-                  //     repeat=true;
-                  //     break;
-                  //   }
-                  // }
-                  // if(repeat==false)
-                  // {
-                  //   // print("Add carpool");
-                  //   carpoollist.add(obj);
-                  // }
 
-                  // bool check=false;
-                  // int listindex=0;
-                  // if (carpoollist!=null&&carpoollist.length!=0)
-                  // {
-                  //   for (int g=0;g<carpoollist.length;g++)
-                  //   {
-                  //     check=false;
-                  //     if(obj.pooldocid==carpoollist[g].pooldocid)
-                  //     {
-                  //       check=true;
-                  //       listindex=g;
-                  //       break;
-                  //     }
-                  //   }
-                  //   if(check)
-                  //   {
-                  //     carpoollist.removeAt(listindex);
-                  //     carpoollist.insert(listindex, obj);
-                  //   }
-                  //   else
-                  //   {
-                  //     carpoollist.add(obj);
-                  //   }
-                  // }
-                  // else
-                  // {
-                  //   carpoollist.add(obj);
-                  //   print("carpool added");
-                  // }
                 }
               }
             }
@@ -750,7 +729,206 @@ class _findcarpoolState extends State<findcarpool> {
                   }
                 }
               }
+                 List <CarpoolObject> carpoolToDisplay=[];
+              List <UserData> hostToDisplay=[];
+              List <int> numacceptToDisplay=[];
+              if (_isFilter)
+              {
+                carpoolToDisplay=filterCarpoolList;
+                hostToDisplay=filteruser;
+                numacceptToDisplay=filternumaccept;
+              }
+              else
+              {
+                carpoolToDisplay=carpoollist;
+                hostToDisplay=user;
+                numacceptToDisplay=numaccept;
+              }
               return Scaffold(
+                endDrawer:Drawer(
+      child: ListView(
+        children:<Widget> [
+            Container(
+              height: 80,
+              child: DrawerHeader(
+                child:Center(
+                  child: Text("Filter List",style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold,color: Colors.blue[800]),),
+                )
+                ),
+            ),
+            Column(
+              children: [
+                SizedBox(height: 20,),
+                Text("Gender",style: TextStyle(fontSize: 20, color: Colors.black,fontWeight: FontWeight.bold)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Row(
+                      children: [
+                         Radio<String>(
+                    // title: const Text("Male"),
+                    value: "Male",
+                    groupValue: gender,
+                    onChanged: (String? value){
+                      setState(() {
+                        gender=value;
+                      });
+                    }),
+                    Text("Male"),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                         Radio<String>(
+                    // title:const Text("Female") ,
+                    value: "Female",
+                    groupValue: gender,
+                    onChanged: (String? value){
+                      setState(() {
+                        gender=value;
+                      });
+                    }),
+                    Text("Female"),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                         Radio<String>(
+                    // title: const Text("Male"),
+                    value: "Any",
+                    groupValue: gender,
+                    onChanged: (String? value){
+                      setState(() {
+                        gender=value;
+                      });
+                    }),
+                    Text("Any"),
+                      ],
+                    ),
+                  ],
+                )
+              ],
+            ),
+            SizedBox(height: 40,),
+            Column(
+              children: [
+                Text("Price",style: TextStyle(fontSize: 20, color: Colors.black,fontWeight: FontWeight.bold)),
+                SizedBox(height: 20,),
+                 RangeSlider(
+      values: _currentRangeValues,
+      max: 300,
+      divisions: 15,
+      labels: RangeLabels(
+       "RM"+ _currentRangeValues.start.round().toString(),
+       "RM"+ _currentRangeValues.end.round().toString(),
+      ),
+      onChanged: (RangeValues values) {
+        setState(() {
+          _currentRangeValues = values;
+        });
+      },
+    ),
+              ],
+            ),
+            SizedBox(height: 40,),
+            Column(
+              children: [
+                Text("Carpool Type",style: TextStyle(fontSize: 20, color: Colors.black,fontWeight: FontWeight.bold)),
+                SizedBox(height: 20,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Row(
+                      children: [
+                         Radio<String>(
+                    // title: const Text("Male"),
+                    value: "One-Time",
+                    groupValue: poolType,
+                    onChanged: (String? value){
+                      setState(() {
+                        poolType=value;
+                      });
+                    }),
+                    Text("One-Time"),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                         Radio<String>(
+                    // title:const Text("Female") ,
+                    value: "Frequent",
+                    groupValue: poolType,
+                    onChanged: (String? value){
+                      setState(() {
+                        poolType=value;
+                      });
+                    }),
+                    Text("Frequent"),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                         Radio<String>(
+                    // title:const Text("Female") ,
+                    value: "Any",
+                    groupValue: poolType,
+                    onChanged: (String? value){
+                      setState(() {
+                        poolType=value;
+                      });
+                    }),
+                    Text("Any"),
+                      ],
+                    )
+                  ],
+                )
+              ],
+            ),
+            SizedBox(height: 20,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  child:Text("Reset"),
+                  onPressed: (){
+                    setState(() {
+                      gender="Male";
+                      poolType="One-Time";
+                       _currentRangeValues = const RangeValues(0,50);
+                    });
+                  },
+                 style: ButtonStyle(
+                   backgroundColor:MaterialStateProperty.all<Color>(Colors.white),
+                   foregroundColor:MaterialStateProperty.all<Color>(darkblue),
+                   side: MaterialStateProperty.all(BorderSide(color: darkblue))
+                   ),
+                  ),
+                  SizedBox(width: 20),
+                  TextButton(
+                    child: Text("Apply"),
+                    onPressed:(){
+
+
+                        filterCarpool();
+                      print("AAA");
+
+                        _isFilter=true;
+
+                      Navigator.pop(context);
+
+
+                    },
+                    style: ButtonStyle(
+                   backgroundColor:MaterialStateProperty.all<Color>(darkblue),
+                   foregroundColor:MaterialStateProperty.all<Color>(Colors.white),
+                   ),
+                    )
+              ],
+            ),
+        ],
+      ),
+    ),
+
                 appBar: AppBar(
                   actions: [
                     IconButton(
@@ -768,10 +946,12 @@ class _findcarpoolState extends State<findcarpool> {
                   title: const Text("Matching Carpool List"),
                   backgroundColor: lightpp
                 ),
-                body: Container(
+                body: carpoolToDisplay.length==0?Center(child:Text("There is no matching carpool...",style: TextStyle(
+                  fontSize: 20
+                ),)):Container(
                   padding: EdgeInsets.all(10.0),
                   child: ListView.builder(
-                    itemCount: carpoollist.length,
+                    itemCount: carpoolToDisplay.length,
                     itemBuilder: (context,index){
                       return Card(
                         child: Container(
@@ -782,9 +962,9 @@ class _findcarpoolState extends State<findcarpool> {
                                 flex: 1,
                                 child: InkWell(
                                   onTap: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>ViewUserProfile(user: user[index])));
+                                    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>ViewUserProfile(user: hostToDisplay[index])));
                                   },
-                                  child: Image.network(user[index].imageurl),
+                                  child: Image.network(hostToDisplay[index].imageurl),
                                 )
                               ),
                               Expanded(
@@ -799,7 +979,7 @@ class _findcarpoolState extends State<findcarpool> {
                                           Icon(Icons.date_range),
                                           SizedBox(width: 15.0,),
                                           Text(
-                                            carpoollist[index].datetime,
+                                            carpoolToDisplay[index].datetime,
                                             style: TextStyle(
                                               fontSize: 16.0,
                                             ),
@@ -812,7 +992,7 @@ class _findcarpoolState extends State<findcarpool> {
                                           Icon(Icons.airport_shuttle),
                                           SizedBox(width: 15.0),
                                           SizedBox(width: 200,
-                                          child:  Text(carpoollist[index].start),),
+                                          child:  Text(carpoolToDisplay[index].start),),
                                         ],
                                       ),
                                       Icon(Icons.more_vert),
@@ -821,7 +1001,7 @@ class _findcarpoolState extends State<findcarpool> {
                                           Icon(Icons.arrow_downward),
                                           SizedBox(width: 15.0),
                                           SizedBox(width: 200,
-                                          child:  Text(carpoollist[index].destination),),
+                                          child:  Text(carpoolToDisplay[index].destination),),
                                         ],
                                       ),
                                       SizedBox(height: 15.0,),
@@ -868,19 +1048,19 @@ class _findcarpoolState extends State<findcarpool> {
                                           Expanded(
                                             flex: 4,
                                             child: Text(
-                                              carpoollist[index].vehicletype,
+                                              carpoolToDisplay[index].vehicletype,
                                             ),
                                           ),
                                           Expanded(
                                             flex: 4,
                                             child: Text(
-                                              carpoollist[index].plateNo,
+                                              carpoolToDisplay[index].plateNo,
                                             ),
                                           ),
                                           Expanded(
                                             flex: 3,
                                             child: Text(
-                                              "RM " + carpoollist[index].price.toStringAsFixed(2),
+                                              "RM " + carpoolToDisplay[index].price.toStringAsFixed(2),
                                             ),
                                           ),
                                         ],
@@ -891,7 +1071,7 @@ class _findcarpoolState extends State<findcarpool> {
                                           Icon(Icons.settings),
                                           SizedBox(width: 15.0),
                                           Text(
-                                            "Carpool Type : " +carpoollist[index].type+" carpool",
+                                            "Carpool Type : " +carpoolToDisplay[index].type+" carpool",
                                             // style: TextStyle(
                                             //   fontSize: 16.0,
                                             //   fontWeight: FontWeight.bold,
@@ -902,14 +1082,14 @@ class _findcarpoolState extends State<findcarpool> {
                                       ),
                                       SizedBox(height: 10.0,),
 
-                                      carpoollist[index].type == "Frequent"
+                                      carpoolToDisplay[index].type == "Frequent"
                                       ?
                                         Row(
                                           children: [
                                             Icon(Icons.repeat),
                                             SizedBox(width: 15.0,),
                                             SizedBox(width: 200, child:
-                                              Text("Frequent Day: "+ convert(carpoollist[index].repeatedDay),)
+                                              Text("Frequent Day: "+ convert(carpoolToDisplay[index].repeatedDay),)
 
                                             // style: TextStyle(
                                             //   fontSize: 16.0,
@@ -937,7 +1117,7 @@ class _findcarpoolState extends State<findcarpool> {
                                         children: [
                                           Icon(Icons.format_list_numbered),
                                           SizedBox(width: 15.0,),
-                                          Text("Current seat: "+numaccept[index].toString()+"/"+carpoollist[index].seatno.toString())
+                                          Text("Current seat: "+numacceptToDisplay[index].toString()+"/"+carpoolToDisplay[index].seatno.toString())
                                         ],
                                       ),
                                       // :
@@ -951,9 +1131,9 @@ class _findcarpoolState extends State<findcarpool> {
 
                                       SizedBox(height: 10.0,),
 
-                                      validation(CQS,UQS,index)
+                                      validation(carpoolToDisplay,index)
                                       ?
-                                      requestStatus(CQS,UQS,index)
+                                      requestStatus(carpoolToDisplay,index)
                                       :
                                       Container(
                                         alignment: Alignment.centerRight,
@@ -973,7 +1153,14 @@ class _findcarpoolState extends State<findcarpool> {
                       );
                     }
                   ),
-                )
+
+                ),
+                floatingActionButton: Builder(builder:(context)=>
+                FloatingActionButton(
+                  child: Icon(Icons.filter_alt_outlined),
+                  onPressed: (){Scaffold.of(context).openEndDrawer();}
+                  ),
+                  ),
               );
             }
           );

@@ -31,6 +31,13 @@ class _viewofferState extends State<viewoffer> {
 
   Future<void> deleteCarpool() {
     FirebaseFirestore.instance.collection("user").doc(FirebaseAuth.instance.currentUser!.uid).update({'Offered carpools':FieldValue.arrayRemove([widget.voffer.pooldocid])});
+    widget.voffer.requestid.forEach((element) {
+
+ FirebaseFirestore.instance.collection("user").doc(element).update({'Requested carpools':FieldValue.arrayRemove([widget.voffer.pooldocid])});
+
+
+
+    });
     return carpooldb.doc(widget.voffer.pooldocid).delete();
   }
 

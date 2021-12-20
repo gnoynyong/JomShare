@@ -4,9 +4,12 @@ import '../../constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-
+import 'package:jomshare/services/userdatabase.dart';
 class DeleteAccount extends StatefulWidget {
-  const DeleteAccount({ Key? key }) : super(key: key);
+  final String imageurl;
+  final List <dynamic> offeredpools;
+  final List <dynamic> requestedpools;
+  const DeleteAccount({ Key? key, required this.imageurl, required this.offeredpools, required this.requestedpools }) : super(key: key);
 
   @override
   _DeleteAccountState createState() => _DeleteAccountState();
@@ -19,14 +22,113 @@ class _DeleteAccountState extends State<DeleteAccount> {
 
   @override
   Widget build(BuildContext context) {
+      CollectionReference carpooldb = FirebaseFirestore.instance.collection('carpool');
+    Future<void> deleteOfferedCarpool(String pooldocid) async {
+     final carpoolsnapshot=await carpooldb.doc(pooldocid).get();
+     if (carpoolsnapshot.data()!.containsKey("requestList"))
+     {
+       List <dynamic> temp= carpoolsnapshot.data()!["requestList"];
+       if(temp.length!=0)
+       {
+  temp.forEach((element) {
+      FirebaseFirestore.instance.collection("user").doc(element).update({'Requested carpools':FieldValue.arrayRemove([pooldocid])});
+    });
+       }
+
+     }
+
+ carpooldb.doc(pooldocid).delete();
+
+  }
+  Future<void> deleteIDFromRequestedCarpool(dynamic pooldocid) async {
+     final carpoolsnapshot=await carpooldb.doc(pooldocid.toString()).get();
+     if (carpoolsnapshot.data()!.containsKey("requestList"))
+     {
+       List <dynamic> temp= carpoolsnapshot.data()!["requestList"];
+       List <dynamic> tempStatus= carpoolsnapshot.data()!["requestStatus"];
+       List <dynamic> tempstorestatus=[];
+       if(temp.length!=0)
+       {
+         int index=0;
+         print("1:" +FirebaseAuth.instance.currentUser!.uid.toString());
+         for (int g=0;g<temp.length;g++)
+         {
+           print("2:"+temp[g].toString());
+           if(FirebaseAuth.instance.currentUser!.uid.toString()==temp[g].toString())
+           {
+             index=g;
+           }
+           tempstorestatus.add(tempStatus[g].toString());
+
+         }
+         print("3");
+         print("index:"+index.toString());
+         if (index==0&&temp.length==1)
+         {
+           print("z");
+           carpooldb.doc(pooldocid.toString()).update({
+             'requestList':FieldValue.delete(),
+
+           },
+
+           );
+           carpooldb.doc(pooldocid.toString()).update({
+
+             'requestStatus':FieldValue.delete(),
+           }
+           );
+         }
+         else
+         {
+           tempstorestatus.removeAt(index);
+          print("4");
+           carpooldb.doc(pooldocid.toString()).update({'requestList':FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])});
+             print("5");
+            carpooldb.doc(pooldocid.toString()).set(
+              {'requestStatus':FieldValue.delete(),
+                'requestStatus':tempstorestatus,
+              },
+              SetOptions(
+                merge: true
+              )
+              );
+         }
+
+        print("6");
+       }
+
+
+     }
+
+
+
+  }
     Future<void>deleteUserAccount(String email,String password) async{
+
+      widget.offeredpools.forEach((element) {
+        deleteOfferedCarpool(element);
+
+      });
+      widget.requestedpools.forEach((element) {
+        deleteIDFromRequestedCarpool(element);
+      });
     try {
     User? user =await FirebaseAuth.instance.currentUser;
     CollectionReference usersdb = FirebaseFirestore.instance.collection('user');
-    AuthCredential credential = EmailAuthProvider.credential(email: email, password: password);
-    await user!.reauthenticateWithCredential(credential);
-    await usersdb.doc(user.uid).delete();
-    await user.delete();
+
+
+
+
+    AuthCredential credential = EmailAuthProvider.credential(email: email.trim(), password: password.trim());
+     final UserDataBaseService userdbservice= new UserDataBaseService(
+         uid: FirebaseAuth.instance.currentUser!.uid
+        );
+      print("yes");
+     user!.reauthenticateWithCredential(credential);
+      print("yes");
+    userdbservice.deleteImageFromStorage(widget.imageurl);
+     usersdb.doc(user.uid).delete();
+    user.delete();
     print("User is deleted");
     // Navigator.of(context).pushAndRemoveUntil(new MaterialPageRoute(builder: (context)=>new login()),(route)=>false);
 } on FirebaseAuthException catch (e) {
@@ -34,6 +136,7 @@ class _DeleteAccountState extends State<DeleteAccount> {
     print('The user must reauthenticate before this operation can be executed.');
   }
 }
+
 
 }
    return Scaffold(
@@ -134,6 +237,7 @@ Padding(
     ),
           onPressed:()async{
             await deleteUserAccount(_email.text,_password.text);
+          Navigator.pushReplacementNamed(context, "/");
           },
           child: Text(
             'Delete Account',
@@ -149,4 +253,3 @@ Padding(
     );
   }
 }
-
