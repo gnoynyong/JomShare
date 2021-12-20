@@ -9,7 +9,7 @@ import 'package:jomshare/screens/offerpool/OfferCarPool.dart';
 import 'package:jomshare/screens/user%20authentication/login.dart';
 import 'package:jomshare/screens/user%20authentication/register.dart';
 import 'package:jomshare/constants.dart';
-import 'package:jomshare/screens/Profile/SettingsUI.dart';
+
 
 class Home extends StatefulWidget {
   int index=0;

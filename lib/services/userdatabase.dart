@@ -83,6 +83,10 @@ CollectionReference user = FirebaseFirestore.instance.collection('user');
 
 
   }
+  Future <void> deleteImageFromStorage (String url)
+  async {
+   await FirebaseStorage.instance.refFromURL(url).delete();
+  }
 
   Future <void> addCarpoolToUser(String carpoolId) async
   {
