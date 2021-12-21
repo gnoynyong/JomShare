@@ -68,41 +68,32 @@ class ProfileBody extends StatelessWidget {
                 ),
 
             ),
-            InkWell(
-              onTap: (){},
-              child: Padding(
-                padding:EdgeInsets.symmetric(horizontal: 20,vertical: 30),
-                child: SafeArea(
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.privacy_tip,
-                        size: 20,
-                        color: darkblue,
-                      ),
-                      SizedBox(width: 20),
-                Text(
-                "Privacy Policy",
-                style: TextStyle(
-                  fontSize: 16, //16
-                  color: Colors.black,
-                ),
-              ),
-              Spacer(),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: Colors.black,
-              )
-                    ],
-                  ),
-                  ),
-                ),
 
-            ),
 
              InkWell(
-              onTap: (){},
+              onTap: (){
+
+                showDialog(context: context, builder: (context)
+                {
+                  return AlertDialog(
+                    title: Text('Help'),
+                    content: Text("For further information, you can contact us via\n\n1. konghaoyang@graduate.utm.my\n\n2. chongkaijie@graduate.utm.my\n\n3. desmondchiengchee@graduate.utm.my\n\n4. jingxuanyong4903@gmail.com\n\n5. wxsee@graduate.utm.my"
+                    ,style: TextStyle(fontSize: 13),
+                    ),
+                    actions: [
+
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Ok'),
+            ),
+
+                        ],
+
+                  );
+                }
+
+                );
+              },
               child: Padding(
                 padding:EdgeInsets.symmetric(horizontal: 20,vertical: 30),
                 child: SafeArea(
