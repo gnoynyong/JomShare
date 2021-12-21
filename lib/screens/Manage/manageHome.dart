@@ -43,7 +43,7 @@ void initState() {
             });
           },)
           ],
-          backgroundColor: lightpp,
+          backgroundColor: darkblue,
 
           title: Text('Manage My Carpools') ,
           automaticallyImplyLeading: false,
@@ -53,10 +53,10 @@ void initState() {
             indicatorColor: background,
             tabs: [
               Tab(
-                child:Text('Requested\nCarpools',style: TextStyle(color:background,fontSize: 15,fontWeight: FontWeight.bold),),
+                child:Text('Requested\nCarpools',style: TextStyle(color:Colors.white,fontSize: 15,fontWeight: FontWeight.bold),),
               ),
              Tab(
-                child:Text('Offered\nCarpools',style: TextStyle(color:background,fontSize: 15,fontWeight: FontWeight.bold),),
+                child:Text('Offered\nCarpools',style: TextStyle(color:Colors.white,fontSize: 15,fontWeight: FontWeight.bold),),
               ),
             ],
           ),

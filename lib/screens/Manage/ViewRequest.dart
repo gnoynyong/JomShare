@@ -24,6 +24,7 @@ class ViewRequest extends StatefulWidget {
 
 class _ViewRequestState extends State<ViewRequest> {
   String uid=FirebaseAuth.instance.currentUser!.uid;
+  String status="";
   CollectionReference carpooldb =
       FirebaseFirestore.instance.collection('carpool');
   Future <void> cancelCarpool() async {
@@ -88,12 +89,12 @@ class _ViewRequestState extends State<ViewRequest> {
 
   }
 
-  Widget status()
+  Widget showstatus()
   {
 
     int userindex=0;
     bool checkexist=false;
-    String status="";
+
     Color color=Colors.white;
     for (int m=0;m< widget.vrequest.requestid.length;m++)
     {
@@ -197,7 +198,7 @@ return Center();
             padding: const EdgeInsets.only(left: 25.0, right: 25.0, top: 20.0),
             child: Column(
               children: [
-                status(),
+                showstatus(),
 
                 SizedBox(height: 20,),
                 Row(children: [
@@ -469,7 +470,7 @@ return Center();
                     ],
                   ),
                 ),
-                ElevatedButton(
+                status!="accepted"&&status!="pending"?Center():ElevatedButton(
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Colors.red),
                     shadowColor: MaterialStateProperty.all(Colors.grey),
