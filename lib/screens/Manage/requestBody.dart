@@ -91,6 +91,20 @@ class _requestBodyState extends State<requestBody> {
                      print(cds.data()!["Pickup address"]);
                      print(cds.data()!["Drop address"]);
                      requestcarpool.addRequestIDWithStatus(cds.data()!["requestList"],cds.data()!["requestStatus"] );
+                       if (cds.data()!.containsKey("poolstatus"))
+              {
+                requestcarpool.setPoolStatus(cds.data()!["poolstatus"]);
+                print(requestcarpool.poolstatus);
+
+              }
+              if (cds.data()!.containsKey("Host Feedback ID"))
+              {
+                requestcarpool.setHostFeedbackID(cds.data()!["Host Feedback ID"]);
+              }
+              if (cds.data()!.containsKey("Passenger Feedback ID List"))
+              {
+                requestcarpool.setPassengerFeedbackIDList(cds.data()!["Passenger Feedback ID List"]);
+              }
 
                       bool check=false;
             int listindex=0;
@@ -123,12 +137,6 @@ class _requestBodyState extends State<requestBody> {
 
               );
               print('No');
-
-
-
-
-
-
 
           }
           return Container(

@@ -15,7 +15,40 @@ class OfferCard extends StatelessWidget {
   final CarpoolObject
    offer;
   final VoidCallback press;
+  Widget status()
+  {
+    Color color;
+    String status;
+    if (offer.poolstatus!=null&&offer.poolstatus=="complete")
+    {
+      color=Colors.green;
+      status="completed";
 
+    }
+    else
+    {
+       color=Colors.blue;
+      status="on-going";
+
+    }
+    return Container(
+                       padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+
+
+                       decoration: BoxDecoration(
+                         color:color ,
+                         borderRadius: BorderRadius.circular(20)
+
+
+                       ),
+                       child: Text(
+
+                         status.toUpperCase(),
+                         textAlign: TextAlign.center,
+                         style: TextStyle(fontSize: 10,color: Colors.white,fontWeight: FontWeight.bold),
+                       ),
+                     );
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -33,23 +66,18 @@ class OfferCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+              Text(
               offer.datetime,
               style: TextStyle(
                 fontSize: 16.0,
               ),
-            ),
-            // SizedBox(height: 3.0),
-            // Row(
-            //   children: [
-            //     Icon(Icons.date_range),
-            //     SizedBox(width: 10.0),
-            //     Text(
-            //       offer.date,
-            //       style: TextStyle(color: Colors.black87),
-            //     ),
-            //   ],
-            // ),
+            ),status()
+            ],),
+
+
             SizedBox(height: 15.0),
             Row(
               children: [

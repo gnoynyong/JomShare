@@ -6,7 +6,9 @@ class CarpoolObject {
    int seatno;
    List<String> requestid=[];
    List<String> requeststatus=[];
-
+   String poolstatus="";
+   List <String> passengerFeedbackDocList=[];
+   String hostFeedbackDoc="";
   CarpoolObject(
     {
       required this.hostid,
@@ -34,5 +36,21 @@ class CarpoolObject {
     }
 
   }
+  void setPoolStatus (String status)
+  {
+    this.poolstatus=status;
+  }
+  void setPassengerFeedbackIDList (List <dynamic> feedbackIDList)
+  {
+    for (int m=0;m<feedbackIDList.length;m++)
+    {
+      passengerFeedbackDocList.add(feedbackIDList[m].toString());
+    }
+  }
+  void setHostFeedbackID (String id)
+  {
+    hostFeedbackDoc=id;
+  }
+
 
 }

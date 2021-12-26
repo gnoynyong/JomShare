@@ -38,6 +38,9 @@ class _OfferedBodyState extends State<OfferedBody> {
   Widget build(BuildContext context) {
 
     print(FirebaseAuth.instance.currentUser!.uid);
+    setState(() {
+
+    });
     return StreamBuilder<DocumentSnapshot>(
       stream: userdoc,
       builder:
@@ -114,7 +117,22 @@ class _OfferedBodyState extends State<OfferedBody> {
             {
               offerpool.addRequestIDWithStatus(cds.data()!["requestList"],cds.data()!["requestStatus"]);
               print("RequestID: ${offerpool.requestid}");
+
             }
+            if (cds.data()!.containsKey("poolstatus"))
+              {
+                offerpool.setPoolStatus(cds.data()!["poolstatus"]);
+                print(offerpool.poolstatus);
+
+              }
+              if (cds.data()!.containsKey("Host Feedback ID"))
+              {
+                offerpool.setHostFeedbackID(cds.data()!["Host Feedback ID"]);
+              }
+              if (cds.data()!.containsKey("Passenger Feedback ID List"))
+              {
+                offerpool.setPassengerFeedbackIDList(cds.data()!["Passenger Feedback ID List"]);
+              }
 
             print(!carpoolist.contains(offerpool));
             print(carpoolist);

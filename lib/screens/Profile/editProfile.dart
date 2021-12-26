@@ -28,7 +28,7 @@ class _editProfileState extends State<editProfile> {
  File ?_selectedFile;
   bool  _inprocess=true;
   bool _oriImage=true;
-
+  final GlobalKey<FormState> _profileform = GlobalKey<FormState>();
   Widget build(BuildContext context) {
      final Stream<DocumentSnapshot> usersnapshot = user.doc(FirebaseAuth.instance.currentUser!.uid).snapshots();
        final _address = TextEditingController();
@@ -76,7 +76,9 @@ Future<void>updateUser(String x) async{
     return StreamBuilder<DocumentSnapshot>(
       stream: usersnapshot,
       builder: (context, snapshot) {
-         Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
+         Map<String, dynamic> data= snapshot.data!.data() as Map<String, dynamic>;;
+
+
        _address.text=data["address"];
           _phone.text=data["phone"];
           _occupation.text=data["occupation"];
@@ -109,298 +111,333 @@ Future<void>updateUser(String x) async{
     }
   }
 
-        return Scaffold(
+        return Form(
+          key: _profileform,
+          child: Scaffold(
 
-          appBar: AppBar(
-          elevation: 0,
-          backgroundColor: darkblue,
+            appBar: AppBar(
+            elevation: 0,
+            backgroundColor: darkblue,
 
-          centerTitle: true,
-          title: Text("Edit Profile"),
+            centerTitle: true,
+            title: Text("Edit Profile"),
 
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(height: 20,),
-              Center(
-                child: Stack(
-                  children: [
-                    Container(
-                          width: 160,
-                          height: 160,
-                          decoration: BoxDecoration(
-                              border: Border.all(
-                                  width: 4,
-                                  color: Theme.of(context).scaffoldBackgroundColor),
-                              boxShadow: [
-                                BoxShadow(
-                                    spreadRadius: 2,
-                                    blurRadius: 10,
-                                    color: Colors.black.withOpacity(0.1),
-                                    offset: Offset(0, 10))
-                              ],
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(height: 20,),
+                Center(
+                  child: Stack(
+                    children: [
+                      Container(
+                            width: 160,
+                            height: 160,
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                    width: 4,
+                                    color: Theme.of(context).scaffoldBackgroundColor),
+                                boxShadow: [
+                                  BoxShadow(
+                                      spreadRadius: 2,
+                                      blurRadius: 10,
+                                      color: Colors.black.withOpacity(0.1),
+                                      offset: Offset(0, 10))
+                                ],
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+
+                                    fit: BoxFit.cover,
+                                    image: showImage() )),
+
+                          ),
+                          Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: InkWell(
+                            onTap: ()
+                            {
+                              showModalBottomSheet(
+                    context: context,
+                     builder: (BuildContext context)
+                     {
+                          return Container(
+                         height: 80,
+                         color: Colors.white,
+                         child: Row(
+                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                           children: [
+                             Column(
+                               children: [
+                                 IconButton(
+                               onPressed: (){
+                                 getImage(ImageSource.camera);
+
+                                 Navigator.pop(context);
+
+
+                               },
+                                icon: Icon(Icons.camera_alt,)),
+                                Text('Choose From Camera')
+                               ],
+                             )
+                             ,
+                                  Column(
+                               children: [
+                                 IconButton(
+                               onPressed: (){
+                                  getImage(ImageSource.gallery);
+
+                                 Navigator.pop(context);
+
+
+
+                               },
+                                icon: Icon(Icons.file_copy)),
+                                Text('Choose From Gallery')
+                               ],
+                             ),
+
+
+                           ],
+
+                         ));
+
+
+
+                     }
+                     );
+
+
+                            },
+                            child: Container(
+                            height: 40,
+                            width: 40,
+                            decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              image: DecorationImage(
-
-                                  fit: BoxFit.cover,
-                                  image: showImage() )),
-
-                        ),
-                        Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: InkWell(
-                          onTap: ()
-                          {
-                            showModalBottomSheet(
-                  context: context,
-                   builder: (BuildContext context)
-                   {
-                        return Container(
-                       height: 80,
-                       color: Colors.white,
-                       child: Row(
-                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                         children: [
-                           Column(
-                             children: [
-                               IconButton(
-                             onPressed: (){
-                               getImage(ImageSource.camera);
-
-                               Navigator.pop(context);
-
-
-                             },
-                              icon: Icon(Icons.camera_alt,)),
-                              Text('Choose From Camera')
-                             ],
-                           )
-                           ,
-                                Column(
-                             children: [
-                               IconButton(
-                             onPressed: (){
-                                getImage(ImageSource.gallery);
-
-                               Navigator.pop(context);
-
-
-
-                             },
-                              icon: Icon(Icons.file_copy)),
-                              Text('Choose From Gallery')
-                             ],
-                           ),
-
-
-                         ],
-
-                       ));
-
-
-
-                   }
-                   );
-
-
-                          },
-                          child: Container(
-                          height: 40,
-                          width: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              width: 4,
-                              color: Theme.of(context).scaffoldBackgroundColor,
+                              border: Border.all(
+                                width: 4,
+                                color: Theme.of(context).scaffoldBackgroundColor,
+                              ),
+                              color: Colors.blue[800],
                             ),
-                            color: Colors.blue[800],
+                            child: Icon(
+                              Icons.edit,
+                              color: Colors.white,
+                            ),
                           ),
-                          child: Icon(
-                            Icons.edit,
-                            color: Colors.white,
-                          ),
-                        ),
 
-                        )),
-                  ],
+                          )),
+                    ],
+                  ),
                 ),
-              ),
-              SizedBox(height: 20,),
-              Padding(
-      padding: const EdgeInsets.fromLTRB(30, 10, 30, 10),
-      child: TextField(
-        decoration: InputDecoration(
-            contentPadding: EdgeInsets.only(bottom: 3),
-            labelStyle: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold
-            ),
-            labelText: "Phone No",
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-            hintText:_phone.text,
-            hintStyle: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            )),
-            controller: _phone,
-      ),
-    ),
-     Padding(
-      padding: const EdgeInsets.fromLTRB(30, 10, 30, 10),
-      child: TextField(
-        decoration: InputDecoration(
-            contentPadding: EdgeInsets.only(bottom: 3),
-            labelStyle: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold
-            ),
-            labelText: "Address",
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-            hintText:_address.text,
-            hintStyle: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            )),
-            controller: _address,
-      ),
-    ),
-    Padding(
-      padding: const EdgeInsets.fromLTRB(30, 10, 30, 10),
-      child: TextField(
-        decoration: InputDecoration(
-            contentPadding: EdgeInsets.only(bottom: 3),
-            labelStyle: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold
-            ),
-            labelText: "Occupation",
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-            hintText:_occupation.text,
-            hintStyle: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            )),
-            controller: _occupation,
-      ),
-    ),
-    SizedBox(height: 30,),
-    Padding(
-      padding: const EdgeInsets.fromLTRB(27, 10, 27, 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          RaisedButton(
-                      onPressed: (){
-                         Navigator.popUntil(context, ModalRoute.withName('/home'));
-
-                         },
-                      color: Colors.white,
-                      padding: EdgeInsets.symmetric(horizontal: 40),
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                      child: Text(
-                        "Cancel",
-                        style: TextStyle(
-                            fontSize: 14,
-                            letterSpacing: 1.5,
-                            color: Colors.black),
-                      ),
-                    ),
-
-                    RaisedButton(
-                      onPressed: (){
-                          updateUser(imageurl);
-                          setState(() {
-
-                          });
-
-                          var snackBar = SnackBar(content: Text('Update successfully'));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-                      },
-                      color: darkblue,
-                      padding: EdgeInsets.symmetric(horizontal: 40),
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                      child: Text(
-                        "SAVE",
-                        style: TextStyle(
-                            fontSize: 14,
-                            letterSpacing: 1.5,
-                            color: Colors.white),
-                      ),
-                    )
-
-
-
-      ],),
-    ),
-    SizedBox(height: 20,),
-    Center(
-      child:  RaisedButton(
-                      onPressed: (){
-                        showDialog(context: context,
-                    builder: (context)
-                    {
-                      return AlertDialog(
-                        title: Text('Delete Account Confirmation'),
-                        content: Text("Are you sure to delete this account?"),
-                        actions: [
-                          TextButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context)=>DeleteAccount(imageurl: imageurl, offeredpools: offeredpool,requestedpools: requestedpool,))
-                    );
-
+                SizedBox(height: 20,),
+                Padding(
+              padding: const EdgeInsets.fromLTRB(30, 10, 30, 10),
+              child: TextFormField(
+          validator: (value)
+              {
+                  if (value!.isEmpty)
+          {
+            return "Phone number cannot be empty";
+          }
+              String pattern = r'^01[0-9]{1}-[0-9]{7,8}$';
+                RegExp regExp = new RegExp(pattern);
+                if(!regExp.hasMatch(value))
+                {
+                    return 'Please enter valid mobile number';
+                }
 
               },
-              child: const Text('Yes'),
+          decoration: InputDecoration(
+              contentPadding: EdgeInsets.only(bottom: 3),
+              labelStyle: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold
+              ),
+              labelText: "Phone No",
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              hintText:_phone.text,
+              hintStyle: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              )),
+              controller: _phone,
+              ),
             ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('No'),
+             Padding(
+              padding: const EdgeInsets.fromLTRB(30, 10, 30, 10),
+              child: TextFormField(
+          validator: (value){
+            if (value!.isEmpty)
+            {
+              return "Address cannot be empty";
+            }
+          },
+          decoration: InputDecoration(
+              contentPadding: EdgeInsets.only(bottom: 3),
+              labelStyle: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold
+              ),
+              labelText: "Address",
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              hintText:_address.text,
+              hintStyle: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              )),
+              controller: _address,
+              ),
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(30, 10, 30, 10),
+              child: TextFormField(
+          validator: (value)
+          {
+            if(value!.isEmpty)
+            {
+              return "Occupation cannot be empty";
+            }
+          },
+          decoration: InputDecoration(
+              contentPadding: EdgeInsets.only(bottom: 3),
+              labelStyle: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold
+              ),
+              labelText: "Occupation",
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              hintText:_occupation.text,
+              hintStyle: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              )),
+              controller: _occupation,
+              ),
+            ),
+            SizedBox(height: 30,),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(27, 10, 27, 10),
+              child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            RaisedButton(
+                        onPressed: (){
+                           Navigator.popUntil(context, ModalRoute.withName('/home'));
 
-                        ],
-
-
-                      );
-                    });
-
-
-
-                      },
-                      color: Colors.red[600],
-                      padding: EdgeInsets.symmetric(horizontal: 40),
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
-                      child: Text(
-                        "Delete Account",
-                        style: TextStyle(
-                            fontSize: 14,
-                            letterSpacing: 1.5,
-                            color: Colors.white),
+                           },
+                        color: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 40),
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                        child: Text(
+                          "Cancel",
+                          style: TextStyle(
+                              fontSize: 14,
+                              letterSpacing: 1.5,
+                              color: Colors.black),
+                        ),
                       ),
-                    ),
-    )
+
+                      RaisedButton(
+                        onPressed: (){
+                          if(_profileform.currentState!.validate())
+                          {
+                            updateUser(imageurl);
+                            setState(() {
+
+                            });
+
+                            var snackBar = SnackBar(content: Text('Update successfully'));
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+
+                          }
+
+                        },
+                        color: darkblue,
+                        padding: EdgeInsets.symmetric(horizontal: 40),
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                        child: Text(
+                          "SAVE",
+                          style: TextStyle(
+                              fontSize: 14,
+                              letterSpacing: 1.5,
+                              color: Colors.white),
+                        ),
+                      )
+
+
+
+              ],),
+            ),
+            SizedBox(height: 20,),
+            Center(
+              child:  RaisedButton(
+                        onPressed: (){
+                          showDialog(context: context,
+                      builder: (context)
+                      {
+                        return AlertDialog(
+                          title: Text('Delete Account Confirmation'),
+                          content: Text("Are you sure to delete this account?"),
+                          actions: [
+                            TextButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context)=>DeleteAccount(imageurl: imageurl, offeredpools: offeredpool,requestedpools: requestedpool,))
+                      );
+
+
+                },
+                child: const Text('Yes'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('No'),
+              ),
+
+                          ],
+
+
+                        );
+                      });
+
+
+
+                        },
+                        color: Colors.red[600],
+                        padding: EdgeInsets.symmetric(horizontal: 40),
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                        child: Text(
+                          "Delete Account",
+                          style: TextStyle(
+                              fontSize: 14,
+                              letterSpacing: 1.5,
+                              color: Colors.white),
+                        ),
+                      ),
+            )
 
 
 
 
-            ],
+              ],
+            ),
           ),
-        ),
 
 
+          ),
         );
       }
     );

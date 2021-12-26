@@ -441,7 +441,7 @@ class _PoolpageState extends State<Poolpage> {
                         decoration: InputDecoration(
                           icon: Icon(Icons.people),
                         ),
-                        hint: Text('Seat No.'),
+                        hint: Text('Pax No.'),
                         items: <String>[
                           '1 Seat',
                           '2 Seat',

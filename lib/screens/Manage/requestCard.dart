@@ -36,6 +36,11 @@ class RequestCard extends StatelessWidget {
 
 {
   status=request.requeststatus[userindex];
+  if (request.poolstatus=="complete"&&status=="accepted")
+  {
+    color=Colors.green;
+
+  }
   switch (status)
   {
     case "pending": color=Colors.blue;break;
@@ -48,14 +53,14 @@ class RequestCard extends StatelessWidget {
 
 
                        decoration: BoxDecoration(
-                         color:color ,
+                         color:request.poolstatus=="complete"&&status=="accepted"?Colors.green:color ,
                          borderRadius: BorderRadius.circular(20)
 
 
                        ),
                        child: Text(
 
-                         status.toUpperCase(),
+                         request.poolstatus=="complete"&&status=="accepted"?"completed".toUpperCase():status.toUpperCase(),
                          textAlign: TextAlign.center,
                          style: TextStyle(fontSize: 10,color: Colors.white,fontWeight: FontWeight.bold),
                        ),

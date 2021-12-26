@@ -51,6 +51,7 @@ dependencies:
   flutter_phone_direct_caller: ^2.1.0
 
   getwidget: ^2.0.4
+  rating_dialog: ^2.0.0
 
 
   # The following adds the Cupertino Icons font to your application.

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:jomshare/constants.dart';
+import 'package:jomshare/model/FeedbackRating.dart';
 import 'package:jomshare/model/carpool.dart';
 import 'package:jomshare/screens/Manage/EditOffer.dart';
 import 'package:jomshare/screens/Manage/OfferedBody.dart';
@@ -13,8 +14,8 @@ import 'package:jomshare/screens/Manage/manageHome.dart';
 import 'package:jomshare/screens/home/home.dart';
 import 'package:jomshare/screens/offerpool/AcceptPool.dart';
 import 'package:jomshare/screens/welcome/components/body.dart';
-
-
+import 'package:rating_dialog/rating_dialog.dart';
+import 'package:jomshare/model/FeedbackRating.dart';
 
 class viewoffer extends StatefulWidget {
   viewoffer({Key? key, required this.voffer}) : super(key: key);
@@ -28,6 +29,60 @@ class viewoffer extends StatefulWidget {
 class _viewofferState extends State<viewoffer> {
   CollectionReference carpooldb =
       FirebaseFirestore.instance.collection('carpool');
+  updateRequestStatus(DocumentSnapshot snapshot)
+  {
+    List <dynamic> requestList=snapshot.data()!["requestList"];
+    List <dynamic> requestStatus=snapshot.data()!["requestStatus"];
+    List <int> indexlist=[];
+    for (int g=0;g<requestStatus.length;g++)
+    {
+      if (requestStatus[g].toString()=="pending")
+      {
+        indexlist.add(g);
+      }
+    }
+    for (int h=0;h<indexlist.length;h++)
+    {
+      requestStatus[indexlist[h]]="rejected";
+    }
+    carpooldb.doc(widget.voffer.pooldocid).set({
+      "requestStatus":FieldValue.delete(),
+      "requestStatus":requestStatus
+    },
+    SetOptions(merge: true)
+    );
+    print("truexxxx");
+
+
+
+  }
+  Future <void> completeCarpool()
+   async {
+    widget.voffer.poolstatus="complete";
+     var pooldocid2 = widget.voffer.pooldocid;
+     DocumentReference carpool= carpooldb.doc(pooldocid2);
+    carpool.update(
+       {
+         'poolstatus': widget.voffer.poolstatus
+       },
+
+     );
+    await carpool.get().then((value) =>
+     {
+
+       if (value.exists)
+       {
+
+         if (value.data()!.containsKey("requestList")&&value.data()!.containsKey("requestStatus"))
+         {
+
+          updateRequestStatus(value)
+         }
+       }
+     });
+
+
+  }
 
   Future<void> deleteCarpool() {
     FirebaseFirestore.instance.collection("user").doc(FirebaseAuth.instance.currentUser!.uid).update({'Offered carpools':FieldValue.arrayRemove([widget.voffer.pooldocid])});
@@ -62,7 +117,162 @@ class _viewofferState extends State<viewoffer> {
     print (temp);
     return temp;
   }
+  bool checkReadyForComplete ()
+  {
+    DateTime convertDateTime=DateTime.parse(widget.voffer.datetime);
+    if (DateTime.now().isAfter(convertDateTime))
+    {
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+  Widget carpoolStatus ()
+  {
+    String statusWord="";
+    Color statusContainerColor;
+    if (widget.voffer.poolstatus!=null&&widget.voffer.poolstatus=="complete")
+    {
 
+      statusWord="completed";
+      statusContainerColor=Colors.green;
+
+    }
+    else
+    {
+      statusWord="on-going";
+      statusContainerColor=Colors.blue;
+    }
+
+    return Expanded(
+                      flex: 1,
+                      child: Container(
+                        padding: EdgeInsets.fromLTRB(2, 10, 2, 10),
+
+
+                        decoration: BoxDecoration(
+                          color:statusContainerColor,
+                          borderRadius: BorderRadius.circular(20)
+
+
+                        ),
+                        child: Text(
+
+                          statusWord.toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 17.5,color: Colors.white,fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    );
+  }
+  void _showRatingAppDialog() {
+    final _ratingDialog = RatingDialog(
+      commentHint: 'Tell us your feedback',
+      starSize: 30,
+      title: Text(
+        'Rate This Carpool',
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          fontSize: 25,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      image: Image.asset('assets/image/cover.png'),
+
+      message: Text(
+        'Tap a star to set your rating. Add your feedback if you want.',
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 15),
+      ),
+      submitButtonText: 'Submit',
+      onSubmitted:(response)
+      async {
+
+        FeedbackRating hostfeedback=new FeedbackRating(
+          userID: widget.voffer.hostid,
+          carpoolID: widget.voffer.pooldocid,
+          feedback: response.comment,
+          rating: response.rating);
+await hostfeedback.createFeedbackRating().then((value) => {
+            carpooldb.doc(widget.voffer.pooldocid).update({
+           "Host Feedback ID": hostfeedback.feedbackDocID
+         }
+         )
+          });
+
+
+
+
+
+
+      }
+
+      );
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(child:  _ratingDialog,
+      onWillPop: () async => false)
+    );
+  }
+  Widget completeCarpoolButton()
+  {
+    if (checkReadyForComplete()&&widget.voffer.poolstatus!=null)
+    {
+      if (widget.voffer.poolstatus!="complete")
+      {
+        return ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.green),
+                    shadowColor: MaterialStateProperty.all(Colors.grey),
+                    overlayColor:
+                        MaterialStateProperty.all(Colors.red[400]),
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    ),
+                  ),
+                  onPressed: ()  async{
+                    completeCarpool().then((value) => {
+                   _showRatingAppDialog()
+
+
+
+                 }).then((value) => {
+                  setState(() {})
+
+                 });
+
+
+
+
+                  },
+                  child: Wrap(
+                    spacing: 10.0,
+                    children: [
+                      Icon(
+                        Icons.assignment_turned_in_outlined,
+                        size: 20.0,
+                      ),
+                      Text(
+                        "Complete carpool",
+                        style: TextStyle(fontSize: 16.0),
+                      ),
+                    ],
+                  ),
+                );
+      }
+      return Center();
+
+    }
+    else
+    {
+      return Center();
+    }
+  }
   @override
   Widget build(BuildContext context) {
     String countPassenger ()
@@ -70,7 +280,7 @@ class _viewofferState extends State<viewoffer> {
    int numpassenger=0;
 
   List <String>requestUserId=[];
-
+   print("Status: "+widget.voffer.poolstatus);
 
 
    for (int m=0;m<widget.voffer.requestid.length;m++)
@@ -100,9 +310,9 @@ class _viewofferState extends State<viewoffer> {
         },
         label:  Text(
 
-                        "View passengers",
+                        "View\npassengers",
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16.0),
+                        style: TextStyle(fontSize: 15.0),
                       ),),
 
 
@@ -117,6 +327,9 @@ class _viewofferState extends State<viewoffer> {
         leading: IconButton(
           onPressed: (){
             Navigator.popUntil(context, ModalRoute.withName('/home'));
+            setState(() {
+
+            });
           },
           icon: Icon(Icons.arrow_back),
         ),
@@ -170,6 +383,23 @@ class _viewofferState extends State<viewoffer> {
             padding: const EdgeInsets.only(left: 25.0, right: 25.0, top: 20.0),
             child: Column(
               children: [
+                Row(children: [
+                  Expanded(
+                      flex: 1,
+                      child: Text(
+                        "Carpool Status :",
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey),
+                      ),
+                    ),
+                    carpoolStatus()
+
+
+
+                ],),
+                SizedBox(height: 20,),
                 Row(children: [
                   Expanded(
                       flex: 1,
@@ -433,7 +663,7 @@ class _viewofferState extends State<viewoffer> {
                 SizedBox(
                   height: 15.0,
                 ),
-                ElevatedButton(
+                widget.voffer.poolstatus!=null&&widget.voffer.poolstatus=="complete"?Center():ElevatedButton(
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Colors.green),
                     shadowColor: MaterialStateProperty.all(Colors.grey),
@@ -466,7 +696,7 @@ class _viewofferState extends State<viewoffer> {
                     ],
                   ),
                 ),
-                ElevatedButton(
+                widget.voffer.poolstatus!=null&&widget.voffer.poolstatus=="complete"?Center():ElevatedButton(
                   style: ButtonStyle(
                     shadowColor: MaterialStateProperty.all(Colors.grey),
                     overlayColor:
@@ -498,7 +728,7 @@ class _viewofferState extends State<viewoffer> {
                     ],
                   ),
                 ),
-                ElevatedButton(
+                checkReadyForComplete()?Center():ElevatedButton(
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Colors.red),
                     shadowColor: MaterialStateProperty.all(Colors.grey),
@@ -552,7 +782,9 @@ class _viewofferState extends State<viewoffer> {
                       ),
                     ],
                   ),
-                )
+                ),
+                completeCarpoolButton()
+
               ],
             ),
           )

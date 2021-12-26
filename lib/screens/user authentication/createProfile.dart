@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:jomshare/constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jomshare/screens/user%20authentication/license.dart';
@@ -98,7 +99,19 @@ String ?validate (String ?value)
           SizedBox(height: 10,),
           TextFormField(
             controller: _icno,
-            validator: validate,
+            validator: (value)
+            {
+              if (value!.isEmpty)
+              {
+                return "IC Number cannot be empty";
+              }
+                String pattern = r'^[0-9]{6}-[0-9]{2}-[0-9]{4}$';
+              RegExp regExp = new RegExp(pattern);
+              if (!regExp.hasMatch(value))
+              {
+                return "Invalid IC Number";
+              }
+            },
 
             decoration: InputDecoration(
               filled: true,
@@ -107,7 +120,7 @@ String ?validate (String ?value)
               hintStyle: TextStyle(
                 color: Colors.grey
               ),
-              hintText: 'IC Number',
+              hintText: 'IC Number (XXXXXX-XX-XXXX)',
               prefixIcon: Icon(Icons.person
               ,size: 30,color: Colors.black),
               focusedBorder:OutlineInputBorder(
@@ -164,12 +177,22 @@ String ?validate (String ?value)
            SizedBox(height: 10,),
           TextFormField(
             controller: _age,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             keyboardType: TextInputType.numberWithOptions(
               decimal: false,
               signed: false,
 
             ),
-            validator: validate,
+            validator: (value){
+              if (value!.isEmpty)
+              {
+                return "Age cannot be empty";
+              }
+              if (int.parse(value)<=5||int.parse(value)>120)
+              {
+                return "Invalid age";
+              }
+            },
 
             decoration: InputDecoration(
               filled: true,
@@ -203,7 +226,20 @@ String ?validate (String ?value)
             controller: _phone,
             keyboardType: TextInputType.phone,
 
-            validator: validate,
+            validator: (value)
+            {
+                if (value!.isEmpty)
+  {
+    return "Phone number cannot be empty";
+  }
+            String pattern = r'^01[0-9]{1}-[0-9]{7,8}$';
+              RegExp regExp = new RegExp(pattern);
+              if(!regExp.hasMatch(value))
+              {
+                  return 'Please enter valid mobile number';
+              }
+
+            },
             decoration: InputDecoration(
               filled: true,
 
@@ -211,7 +247,7 @@ String ?validate (String ?value)
               hintStyle: TextStyle(
                 color: Colors.grey
               ),
-              hintText: 'Phone Number',
+              hintText: 'Phone Number (Start with 01X-)',
               prefixIcon: Icon(Icons.phone
               ,size: 30,color: Colors.black),
               focusedBorder:OutlineInputBorder(
