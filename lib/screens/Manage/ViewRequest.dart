@@ -11,7 +11,8 @@ import 'package:jomshare/screens/Manage/requestBody.dart';
 import 'package:jomshare/screens/Manage/manageHome.dart';
 import 'package:jomshare/screens/home/home.dart';
 import 'package:jomshare/screens/welcome/components/body.dart';
-
+import 'package:rating_dialog/rating_dialog.dart';
+import 'package:jomshare/model/FeedbackRating.dart';
 
 class ViewRequest extends StatefulWidget {
   ViewRequest({Key? key, required this.vrequest}) : super(key: key);
@@ -37,7 +38,7 @@ class _ViewRequestState extends State<ViewRequest> {
    List requestorID=x.data()!["requestList"];
    List requestorStatus=x.data()!["requestStatus"];
    int requestorIndex;
-
+    // bool passengerfeedbackexist=false;
 
    for (int m=0;m<requestorID.length;m++)
    {
@@ -133,14 +134,14 @@ class _ViewRequestState extends State<ViewRequest> {
 
 
                         decoration: BoxDecoration(
-                          color:color ,
+                          color:widget.vrequest.poolstatus=="complete"&&status=="accepted"?Colors.green:color ,
                           borderRadius: BorderRadius.circular(20)
 
 
                         ),
                         child: Text(
 
-                          status.toUpperCase(),
+                         widget.vrequest.poolstatus=="complete"&&status=="accepted"?"completed".toUpperCase()+" &\n"+status.toUpperCase(): status.toUpperCase(),
                           textAlign: TextAlign.center,
                           style: TextStyle(fontSize: 17.5,color: Colors.white,fontWeight: FontWeight.bold),
                         ),
@@ -178,362 +179,572 @@ return Center();
    return (numpassenger).toString()+"/"+widget.vrequest.seatno.toString();
 
  }
+  void _showRatingAppDialog() {
+    final _ratingDialog = RatingDialog(
+      commentHint: 'Tell us your feedback',
+      starSize: 30,
+      title: Text(
+        'Rate This Carpool',
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          fontSize: 25,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      image: Image.asset('assets/image/cover.png'),
+
+      message: Text(
+        'Tap a star to set your rating. Add your feedback if you want.',
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 15),
+      ),
+      submitButtonText: 'Submit',
+      onSubmitted:(response)
+      async {
+
+        FeedbackRating passengerfeedback=new FeedbackRating(
+          userID: FirebaseAuth.instance.currentUser!.uid,
+          carpoolID: widget.vrequest.pooldocid,
+          feedback: response.comment,
+          rating: response.rating);
+await passengerfeedback.createFeedbackRating().then((value) => {
+            carpooldb.doc(widget.vrequest.pooldocid).update({
+                "Passenger Feedback ID List": FieldValue.arrayUnion([passengerfeedback.feedbackDocID])
+         }
+         )
+          });
+
+
+
+
+
+
+      }
+
+      );
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(child:  _ratingDialog,
+      onWillPop: () async => false)
+    );
+  }
+  int getIndexAtRequest ()
+  {
+    int userindex=0;
+    bool checkexist=false;
+
+    Color color=Colors.white;
+    for (int m=0;m< widget.vrequest.requestid.length;m++)
+    {
+      if (uid==widget.vrequest.requestid[m])
+      {
+        userindex=m;
+        checkexist=true;
+      }
+
+    }
+    if (checkexist)
+    {
+      return userindex;
+    }
+    else
+    {
+      return -1;
+    }
+  }
+ Widget completeCarpoolButton()
+  {
+
+    int userindex=0;
+    bool checkexist=false;
+
+    Color color=Colors.white;
+    for (int m=0;m< widget.vrequest.requestid.length;m++)
+    {
+      if (uid==widget.vrequest.requestid[m])
+      {
+        userindex=m;
+        checkexist=true;
+      }
+
+    }
+if (widget.vrequest.poolstatus=="complete"&&checkexist&&widget.vrequest.requeststatus[userindex]=="accepted")
+      {
+        return Center(
+          child: ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.green),
+                      shadowColor: MaterialStateProperty.all(Colors.grey),
+                      overlayColor:
+                          MaterialStateProperty.all(Colors.red[400]),
+                      shape: MaterialStateProperty.all(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                    ),
+                    onPressed: ()  {
+              _showRatingAppDialog();
+              setState(() {
+
+              });
+
+
+
+
+
+                    },
+                    child: Wrap(
+                      spacing: 10.0,
+                      children: [
+                        Icon(
+                          Icons.assignment_turned_in_outlined,
+                          size: 20.0,
+                        ),
+                        Text(
+                          "Make rating \n& feedback ",
+                          textAlign: TextAlign.center
+                          ,
+                          style: TextStyle(fontSize: 16.0),
+                        ),
+                      ],
+                    ),
+                  ),
+        );
+      }
+      else
+      {
+        return Center();
+      }
+
+
+
+
+
+
+  }
+
+
+// Future<bool> checkFeedbackExist ()
+//  async {
+//     if (widget.vrequest.passengerFeedbackDocList==null)
+//     {
+//       return false;
+//     }
+//     else
+//     {
+
+
+//       bool feedbackexist=false;
+//      QuerySnapshot snapshot=await FirebaseFirestore.instance.collection("FeedbackRating").where('carpoolID', isEqualTo: widget.vrequest.pooldocid ).where('userID', isEqualTo:  FirebaseAuth.instance.currentUser!.uid).get();
+//      snapshot.docs.forEach((element) {
+//         if (element.data()["carpoolID"]==widget.vrequest.pooldocid&&element.data()["userID"]==FirebaseAuth.instance.currentUser!.uid)
+//         {
+//           feedbackexist=true;
+//           print("Exist is true");
+//         }
+//       });
+//      if (feedbackexist)
+//      {
+//        return true;
+//      }
+//      else
+//      {
+//        return false;
+//      }
+
+
+
+
+
+
+//     }
+
+//   }
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: ()
-          {
-            Navigator.popUntil(context, ModalRoute.withName('/home'));
+    final Stream<QuerySnapshot> feedbackdoc = FirebaseFirestore.instance.collection('FeedbackRating').snapshots();
+    bool feedbackExistence=false;
+    return StreamBuilder<QuerySnapshot>(
+      stream: feedbackdoc,
+      builder: (context, snapshottemp) {
+        if (snapshottemp.hasData)
+        {
+          List<QueryDocumentSnapshot> feedbackdoclist=snapshottemp.data!.docs;
+        if (feedbackdoclist!=null&&feedbackdoclist.length!=0)
+        {
+          feedbackdoclist.forEach((element)
+        {
+          if (element.data()["carpoolID"]==widget.vrequest.pooldocid&&element.data()["userID"]==FirebaseAuth.instance.currentUser!.uid)
+        {
+          feedbackExistence=true;
+          print("Exist is true");
+        }
+         print("Exist is false");
+        });
+        }
 
-          },
-          icon: Icon(Icons.arrow_back),),
-          title: const Text("View Detail Information"),
-          backgroundColor: lightpp),
-          body: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-            padding: const EdgeInsets.only(left: 25.0, right: 25.0, top: 20.0),
-            child: Column(
-              children: [
-                showstatus(),
+        }
 
-                SizedBox(height: 20,),
-                Row(children: [
-                  Expanded(
-                      flex: 1,
-                      child: Text(
-                        "Carpool Type :",
-                        style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        widget.vrequest.type+" carpool",
-                        style: TextStyle(fontSize: 17.5),
-                      ),
-                    ),
-
-
-                ],)
-                ,
-                SizedBox(height: 20,)
-                ,
-                Row(children: [
-                  Expanded(
-                      flex: 1,
-                      child: Text(
-                        "No of passengers /seats offered :",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                            fontSize: 17.5,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey),
-                      ),
-                    ),
-                    Expanded(
-                    flex: 1,
-                    child: Text(
-                      countPassenger(),
-                      style: TextStyle(fontSize: 17.5),
-                    ),
-                  ),
-
-
-
-
-
-
-
-                ],),
-                SizedBox(height: 20,),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        "Date Time :",
-                        style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: widget.vrequest.type == "Frequent"
-                          ? Text(
-                              "Frequent Day: ",
-                              style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey),
-                            )
-                          : Container(),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 15.0),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        widget.vrequest.datetime,
-                        style: TextStyle(fontSize: 17.5),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: widget.vrequest.type == "Frequent"
-                          ? SizedBox(
-                            width: 100,
-                            child: Text(
-                                convert(widget.vrequest.repeatedDay),
-                                style: TextStyle(fontSize: 17.5),
-                              ),
-                          )
-                          : Container(),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 20.0,
-                ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 150,
-                      child: Text(
-                      "Starting Point:",
-                      style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey),
-                    )
-                    )
-
-                  ],
-                ),
-                SizedBox(
-                  height: 15.0,
-                ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 260,
-                      child:  Text(
-                      widget.vrequest.start,
-                      style: TextStyle(fontSize: 17.5),
-                    )
-                    )
-
-                  ],
-                ),
-                SizedBox(
-                  height: 20.0,
-                ),
-                Row(
-                  children: [
-                    SizedBox(width: 200,
-                    child:Text(
-                      "Destination:",
-                      style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey),
-                    ))
-
-                  ],
-                ),
-                SizedBox(
-                  height: 15.0,
-                ),
-                Row(
-                  children: [
-                    SizedBox(width: 260,
-                    child: Text(
-                      widget.vrequest.destination,
-                      style: TextStyle(fontSize: 17.5),
-                    ))
-
-                  ],
-                ),
-                SizedBox(
-                  height: 20.0,
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        "Vehicle Type :",
-                        style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        "Plate No :",
-                        style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        "Price :",
-                        style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 15.0),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        widget.vrequest.vehicletype,
-                        style: TextStyle(fontSize: 17.5),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        widget.vrequest.plateNo,
-                        style: TextStyle(fontSize: 17.5),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        "RM " + widget.vrequest.price.toStringAsFixed(2),
-                        style: TextStyle(fontSize: 17.5),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 15.0,
-                ),
-
-                SizedBox(
-                  height: 15.0,
-                ),
-                ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.green),
-                    shadowColor: MaterialStateProperty.all(Colors.grey),
-                    overlayColor:
-                        MaterialStateProperty.all(Colors.green[400]),
-                    shape: MaterialStateProperty.all(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.push(context,
-                    MaterialPageRoute(builder: (BuildContext context)
-                    =>ViewHostPassenger(request: widget.vrequest,))
-                    );
-
-                  },
-                  child: Wrap(
-                    spacing: 10.0,
-                    children: [
-                      Icon(
-                        Icons.people,
-                        size: 20.0,
-                      ),
-                      Text(
-
-                        "View host and \npassengers",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16.0),
-                      ),
-                    ],
-                  ),
-                ),
-                status!="accepted"&&status!="pending"?Center():ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.red),
-                    shadowColor: MaterialStateProperty.all(Colors.grey),
-                    overlayColor:
-                        MaterialStateProperty.all(Colors.red[400]),
-                    shape: MaterialStateProperty.all(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                    ),
-                  ),
-                  onPressed: () {
-                    showDialog(context: context,
-                    builder: (context)
-                    {
-                      return AlertDialog(
-                        title: Text('Cancel Requested Carpool Confirmation'),
-                        content: Text("Are you sure to cancel this requested carpool?"),
-                        actions: [
-                          TextButton(
-              onPressed: () {
-                cancelCarpool();
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              onPressed: ()
+              {
                 Navigator.popUntil(context, ModalRoute.withName('/home'));
 
               },
-              child: const Text('Yes'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('No'),
-            ),
+              icon: Icon(Icons.arrow_back),),
+              title: const Text("View Detail Information"),
+              backgroundColor: lightpp),
+              body: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                padding: const EdgeInsets.only(left: 25.0, right: 25.0, top: 20.0),
+                child: Column(
+                  children: [
+                    showstatus(),
 
+                    SizedBox(height: 20,),
+                    Row(children: [
+                      Expanded(
+                          flex: 1,
+                          child: Text(
+                            "Carpool Type :",
+                            style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            widget.vrequest.type+" carpool",
+                            style: TextStyle(fontSize: 17.5),
+                          ),
+                        ),
+
+
+                    ],)
+                    ,
+                    SizedBox(height: 20,)
+                    ,
+                    Row(children: [
+                      Expanded(
+                          flex: 1,
+                          child: Text(
+                            "No of passengers /seats offered :",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                                fontSize: 17.5,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey),
+                          ),
+                        ),
+                        Expanded(
+                        flex: 1,
+                        child: Text(
+                          countPassenger(),
+                          style: TextStyle(fontSize: 17.5),
+                        ),
+                      ),
+
+
+
+
+
+
+
+                    ],),
+                    SizedBox(height: 20,),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            "Date Time :",
+                            style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: widget.vrequest.type == "Frequent"
+                              ? Text(
+                                  "Frequent Day: ",
+                                  style: TextStyle(
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey),
+                                )
+                              : Container(),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 15.0),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            widget.vrequest.datetime,
+                            style: TextStyle(fontSize: 17.5),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: widget.vrequest.type == "Frequent"
+                              ? SizedBox(
+                                width: 100,
+                                child: Text(
+                                    convert(widget.vrequest.repeatedDay),
+                                    style: TextStyle(fontSize: 17.5),
+                                  ),
+                              )
+                              : Container(),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 20.0,
+                    ),
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 150,
+                          child: Text(
+                          "Starting Point:",
+                          style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey),
+                        )
+                        )
+
+                      ],
+                    ),
+                    SizedBox(
+                      height: 15.0,
+                    ),
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 260,
+                          child:  Text(
+                          widget.vrequest.start,
+                          style: TextStyle(fontSize: 17.5),
+                        )
+                        )
+
+                      ],
+                    ),
+                    SizedBox(
+                      height: 20.0,
+                    ),
+                    Row(
+                      children: [
+                        SizedBox(width: 200,
+                        child:Text(
+                          "Destination:",
+                          style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey),
+                        ))
+
+                      ],
+                    ),
+                    SizedBox(
+                      height: 15.0,
+                    ),
+                    Row(
+                      children: [
+                        SizedBox(width: 260,
+                        child: Text(
+                          widget.vrequest.destination,
+                          style: TextStyle(fontSize: 17.5),
+                        ))
+
+                      ],
+                    ),
+                    SizedBox(
+                      height: 20.0,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            "Vehicle Type :",
+                            style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            "Plate No :",
+                            style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            "Price :",
+                            style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 15.0),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            widget.vrequest.vehicletype,
+                            style: TextStyle(fontSize: 17.5),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            widget.vrequest.plateNo,
+                            style: TextStyle(fontSize: 17.5),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            "RM " + widget.vrequest.price.toStringAsFixed(2),
+                            style: TextStyle(fontSize: 17.5),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 15.0,
+                    ),
+
+                    SizedBox(
+                      height: 15.0,
+                    ),
+                    getIndexAtRequest()==-1||(getIndexAtRequest()!=-1&&widget.vrequest.requeststatus[getIndexAtRequest()]=="rejected")?Center():ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(Colors.green),
+                        shadowColor: MaterialStateProperty.all(Colors.grey),
+                        overlayColor:
+                            MaterialStateProperty.all(Colors.green[400]),
+                        shape: MaterialStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(context,
+                        MaterialPageRoute(builder: (BuildContext context)
+                        =>ViewHostPassenger(request: widget.vrequest,))
+                        );
+
+                      },
+                      child: Wrap(
+                        spacing: 10.0,
+                        children: [
+                          Icon(
+                            Icons.people,
+                            size: 20.0,
+                          ),
+                          Text(
+
+                            "View host and \npassengers",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 16.0),
+                          ),
                         ],
-
-
-                      );
-                    });
-                    },
-                  child: Wrap(
-                    spacing: 10.0,
-                    children: [
-                      Icon(
-                        Icons.cancel,
-                        size: 20.0,
                       ),
-                      Text(
-                        "Cancel request",
-                        style: TextStyle(fontSize: 16.0),
+                    ),
+                    (widget.vrequest.poolstatus!=null&&widget.vrequest.poolstatus=="complete")||(status!="accepted"&&status!="pending")?Center():ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(Colors.red),
+                        shadowColor: MaterialStateProperty.all(Colors.grey),
+                        overlayColor:
+                            MaterialStateProperty.all(Colors.red[400]),
+                        shape: MaterialStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                )
+                      onPressed: () {
+                        showDialog(context: context,
+                        builder: (context)
+                        {
+                          return AlertDialog(
+                            title: Text('Cancel Requested Carpool Confirmation'),
+                            content: Text("Are you sure to cancel this requested carpool?"),
+                            actions: [
+                              TextButton(
+                  onPressed: () {
+                    cancelCarpool();
+                    Navigator.popUntil(context, ModalRoute.withName('/home'));
+
+                  },
+                  child: const Text('Yes'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('No'),
+                ),
+
+                            ],
 
 
-              ],
-            ),
-          )
+                          );
+                        });
+                        },
+                      child: Wrap(
+                        spacing: 10.0,
+                        children: [
+                          Icon(
+                            Icons.cancel,
+                            size: 20.0,
+                          ),
+                          Text(
+                            "Cancel request",
+                            style: TextStyle(fontSize: 16.0),
+                          ),
+                        ],
+                      ),
+                    ),
 
-              ],
 
-            ),
-          ),
+                  ],
+                ),
+              ),
+              feedbackExistence?Center():completeCarpoolButton()
 
+                  ],
+
+                ),
+              ),
+
+        );
+      }
     );
   }
 }

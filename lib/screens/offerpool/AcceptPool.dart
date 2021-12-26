@@ -49,7 +49,7 @@ List <UserData> requestlist=<UserData>[];
         }
         if (!snapshot.data!.data()!.containsKey("requestList"))
         {
-          return Center(child: Text('No requestor'),);
+          return Center(child: Text('No requestors yet.....',style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold),),);
         }
         List <dynamic> requestorlist=List.from(snapshot.data!.data()!["requestList"]);
 

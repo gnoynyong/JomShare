@@ -466,7 +466,25 @@ String? gender = "Any";
                     obj.addRequestIDWithStatus(CQS.docs.elementAt(i).data()["requestList"],CQS.docs.elementAt(i).data()["requestStatus"]);
                     // print("RequestID: ${obj.requestid}");
                   }
-                  carpoollist.add(obj);
+                  if (CQS.docs.elementAt(i).data().containsKey("poolstatus"))
+              {
+                obj.setPoolStatus(CQS.docs.elementAt(i).data()["poolstatus"]);
+
+
+              }
+              if (CQS.docs.elementAt(i).data().containsKey("Host Feedback ID"))
+              {
+                obj.setHostFeedbackID(CQS.docs.elementAt(i).data()["Host Feedback ID"]);
+              }
+              if (CQS.docs.elementAt(i).data().containsKey("Passenger Feedback ID List"))
+              {
+                obj.setPassengerFeedbackIDList(CQS.docs.elementAt(i).data()["Passenger Feedback ID List"]);
+              }
+              if (obj.poolstatus==null||obj.poolstatus!="complete")
+              {
+                 carpoollist.add(obj);
+              }
+
 
 
                 }
@@ -496,7 +514,25 @@ String? gender = "Any";
                       obj.addRequestIDWithStatus(CQS.docs.elementAt(i).data()["requestList"],CQS.docs.elementAt(i).data()["requestStatus"]);
                       print("y");
                     }
-                    carpoollist.add(obj);
+                    if (CQS.docs.elementAt(i).data().containsKey("poolstatus"))
+              {
+                obj.setPoolStatus(CQS.docs.elementAt(i).data()["poolstatus"]);
+
+
+              }
+              if (CQS.docs.elementAt(i).data().containsKey("Host Feedback ID"))
+              {
+                obj.setHostFeedbackID(CQS.docs.elementAt(i).data()["Host Feedback ID"]);
+              }
+              if (CQS.docs.elementAt(i).data().containsKey("Passenger Feedback ID List"))
+              {
+                obj.setPassengerFeedbackIDList(CQS.docs.elementAt(i).data()["Passenger Feedback ID List"]);
+              }
+              if (obj.poolstatus==null||obj.poolstatus!="complete")
+              {
+                 carpoollist.add(obj);
+              }
+
                      print("z");
 
 
@@ -529,7 +565,25 @@ String? gender = "Any";
                     obj.addRequestIDWithStatus(CQS.docs.elementAt(i).data()["requestList"],CQS.docs.elementAt(i).data()["requestStatus"]);
                     // print("RequestID: ${obj.requestid}");
                   }
-                  carpoollist.add(obj);
+                  if (CQS.docs.elementAt(i).data().containsKey("poolstatus"))
+              {
+                obj.setPoolStatus(CQS.docs.elementAt(i).data()["poolstatus"]);
+
+
+              }
+              if (CQS.docs.elementAt(i).data().containsKey("Host Feedback ID"))
+              {
+                obj.setHostFeedbackID(CQS.docs.elementAt(i).data()["Host Feedback ID"]);
+              }
+              if (CQS.docs.elementAt(i).data().containsKey("Passenger Feedback ID List"))
+              {
+                obj.setPassengerFeedbackIDList(CQS.docs.elementAt(i).data()["Passenger Feedback ID List"]);
+              }
+              if (obj.poolstatus==null||obj.poolstatus!="complete")
+              {
+                 carpoollist.add(obj);
+              }
+
 
 
                 }
