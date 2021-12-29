@@ -41,54 +41,57 @@ int _currentIndex = 0;
 
 
 
-    return Scaffold(
-      body: _children.elementAt(_currentIndex),
-      bottomNavigationBar: SingleChildScrollView(
-        child: SizedBox(
-          height: 60,
-          child: Theme(
-            data: Theme.of(context).copyWith(
-            // sets the background color of the `BottomNavigationBar`
-            canvasColor: Colors.white,
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        body: _children.elementAt(_currentIndex),
+        bottomNavigationBar: SingleChildScrollView(
+          child: SizedBox(
+            height: 60,
+            child: Theme(
+              data: Theme.of(context).copyWith(
+              // sets the background color of the `BottomNavigationBar`
+              canvasColor: Colors.white,
 
-            textTheme: Theme
-                .of(context)
-                .textTheme
-                .copyWith(caption: new TextStyle(color: Colors.yellow))),
-            child: BottomNavigationBar(
+              textTheme: Theme
+                  .of(context)
+                  .textTheme
+                  .copyWith(caption: new TextStyle(color: Colors.yellow))),
+              child: BottomNavigationBar(
 
 
 
 
-              elevation: 0,
+                elevation: 0,
 
-              onTap: (index){
-                setState(() {
-               _currentIndex = index;
-             });
-              }, // new
-             currentIndex: _currentIndex,
+                onTap: (index){
+                  setState(() {
+                 _currentIndex = index;
+               });
+                }, // new
+               currentIndex: _currentIndex,
 
-             items: [
-               BottomNavigationBarItem(
-                 icon: Icon(Icons.home,color: darkblue,),
-                 title: Text('Home',style: TextStyle(color: darkblue)),
-               ),
+               items: [
+                 BottomNavigationBarItem(
+                   icon: Icon(Icons.home,color: darkblue,),
+                   title: Text('Home',style: TextStyle(color: darkblue)),
+                 ),
 
-               BottomNavigationBarItem(
-                 icon: Icon(Icons.navigation_outlined,color: darkblue),
-                 title: Text('Trips',style: TextStyle(color: darkblue))
-               ),
-               BottomNavigationBarItem(
-                 icon:  Icon(Icons.chat,color: darkblue),
-                 title: Text('Chat',style: TextStyle(color: darkblue)),
-               ),
-               BottomNavigationBarItem(
-                 icon: Icon(Icons.more_vert , color: darkblue),
-                 title: Text('More',style: TextStyle(color: darkblue,))
-               )
-             ],
-               ),
+                 BottomNavigationBarItem(
+                   icon: Icon(Icons.navigation_outlined,color: darkblue),
+                   title: Text('Trips',style: TextStyle(color: darkblue))
+                 ),
+                 BottomNavigationBarItem(
+                   icon:  Icon(Icons.chat,color: darkblue),
+                   title: Text('Chat',style: TextStyle(color: darkblue)),
+                 ),
+                 BottomNavigationBarItem(
+                   icon: Icon(Icons.more_vert , color: darkblue),
+                   title: Text('More',style: TextStyle(color: darkblue,))
+                 )
+               ],
+                 ),
+            ),
           ),
         ),
       ),
