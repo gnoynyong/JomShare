@@ -109,7 +109,7 @@ String ?validate (String ?value)
               RegExp regExp = new RegExp(pattern);
               if (!regExp.hasMatch(value))
               {
-                return "Invalid IC Number";
+                return "Invalid IC Number Format";
               }
             },
 
@@ -190,7 +190,7 @@ String ?validate (String ?value)
               }
               if (int.parse(value)<=5||int.parse(value)>120)
               {
-                return "Invalid age";
+                return "Invalid age. Max age: 120 & Min age:5";
               }
             },
 
@@ -453,8 +453,8 @@ return Stack(
                    builder: (BuildContext context)
                    {
                         return Container(
-                       height: 100,
-                       color: Colors.lightBlue[400],
+                       height: 80,
+                       color: Colors.white,
                        child: Row(
                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                          children: [

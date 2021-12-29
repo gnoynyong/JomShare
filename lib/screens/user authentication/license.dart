@@ -163,7 +163,9 @@ final AuthService _auth = AuthService();
       ,color: Colors.white,)),
 
     ),
-    body: SingleChildScrollView(
+    body: _isloading?Center(
+        child: CircularProgressIndicator(),
+      ):SingleChildScrollView(
       child: Padding(padding: EdgeInsets.symmetric(horizontal: 30,vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,6 +216,9 @@ final AuthService _auth = AuthService();
         primary: Colors.blue[900]
     ),
                         onPressed: () async {
+                          setState(() {
+                            _isloading=true;
+                          });
 
 
                             LicenseOption==option.No?licenseResult=false:licenseResult=true;
@@ -249,6 +254,9 @@ final AuthService _auth = AuthService();
                             print(url);
                              await user.addUser(arguments['name'], arguments['ic'], arguments['gender'], arguments['age'], arguments['phone'], arguments['address'], arguments['occupation']
                               ,licenseResult,carResult,licenseType,url).then((value) {
+                                setState(() {
+                                  _isloading=false;
+                                });
 
 
                               });
@@ -292,7 +300,7 @@ final AuthService _auth = AuthService();
             title: Text('Registration Error'),
                 content: Text("This email has been registered.Please try with other email"),
                 actions: [
-                  TextButton(onPressed: (){Navigator.pushNamed(context, '/login');;}, child: Text('Ok'))
+                  TextButton(onPressed: (){Navigator.pushReplacementNamed(context, '/login');;}, child: Text('Ok'))
                 ],
               ));
     }
