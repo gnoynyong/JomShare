@@ -6,10 +6,12 @@ import 'package:jomshare/constants.dart';
 import 'package:jomshare/model/carpool.dart';
 import 'package:jomshare/screens/Manage/requestBody.dart';
 import 'package:jomshare/screens/Manage/manageHome.dart';
+import 'package:jomshare/screens/contact/ChatScreen.dart';
 import 'package:jomshare/screens/home/home.dart';
 import 'package:jomshare/screens/welcome/components/body.dart';
 import 'package:jomshare/model/user.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:jomshare/services/userdatabase.dart';
 
 
 class ViewUserProfile extends StatelessWidget {
@@ -67,6 +69,27 @@ _callNumber() async{
   final number = user.phone; //set the number here
   bool? res = await FlutterPhoneDirectCaller.callNumber(number);
 }
+
+ createChatroom(String chatroomid, Map<String,dynamic> chatroomInfoMap)async{
+   final snapshot = await FirebaseFirestore.instance.collection("Chatroom").doc(chatroomid).get();
+
+   if(snapshot.exists){
+     //the chatroom already exist, no need create
+     return true;
+   }
+   else{
+     return FirebaseFirestore.instance.collection("Chatroom").doc(chatroomid).set(chatroomInfoMap);
+   }
+
+ }
+ getChatroomIdByUsername(String a, String b){
+    if(a.substring(0,1).codeUnitAt(0)>b.substring(0,1).codeUnitAt(0)){
+      return "$b\_$a";
+    }
+    else{
+      return "$a\_$b";
+    }
+  }
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -205,10 +228,14 @@ _callNumber() async{
                         ),
                       ),
                     ),
-                    onPressed: () {
-
-
-
+                    onPressed: ()async {
+                      String myname = await UserDataBaseService(uid:FirebaseAuth.instance.currentUser!.uid).getUserName();
+                        var chatroomid = getChatroomIdByUsername(myname  ,user.name);
+                        Map<String,dynamic> chatroomInfoMap = {
+                          "users":[FirebaseAuth.instance.currentUser!.uid,user.uid]
+                        };
+                      createChatroom(chatroomid, chatroomInfoMap);
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>ChatScreen(user.name,myname,user.imageurl)));
                     },
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),

@@ -34,7 +34,6 @@ class _DeleteAccountState extends State<DeleteAccount> {
       FirebaseFirestore.instance.collection("user").doc(element).update({'Requested carpools':FieldValue.arrayRemove([pooldocid])});
     });
        }
-
      }
 
  carpooldb.doc(pooldocid).delete();

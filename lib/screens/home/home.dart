@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:jomshare/screens/Manage/manageHome.dart';
 import 'package:jomshare/screens/Profile/UserProfile.dart';
 import 'package:jomshare/screens/contact/ChatPage.dart';
+import 'package:jomshare/screens/contact/ChatScreen.dart';
 import 'package:jomshare/screens/home/Pool.dart';
 import 'package:jomshare/screens/home/Poolpage.dart';
 import 'package:jomshare/screens/offerpool/OfferCarPool.dart';

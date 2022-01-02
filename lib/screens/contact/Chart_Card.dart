@@ -1,21 +1,46 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:jomshare/screens/contact/ChatScreen.dart';
+import 'package:jomshare/services/userdatabase.dart';
 
-import 'Chat.dart';
 
-class ChatCard extends StatelessWidget {
-  const ChatCard({
-    Key? key,
-    required this.chat,
-    required this.press,
-  }) : super(key: key);
+class ChatCard extends StatefulWidget {
+  String userid = "";
+  String lastMessage="";
+  String lastMessageTS="";
+  ChatCard(this.lastMessage,this.lastMessageTS,this.userid);
 
-   final Chat chat;
-   final VoidCallback press;
+  @override
+  _ChatCardState createState() => _ChatCardState();
+}
 
+  class _ChatCardState extends State<ChatCard>{
+  String username = "";
+  String imageURL = "";
+  String myusername = "";
+  
+  getUserInfo()async{
+    myusername = await UserDataBaseService(uid:FirebaseAuth.instance.currentUser!.uid).getUserName();
+    username = await UserDataBaseService(uid: widget.userid).getUserName();
+    imageURL = await UserDataBaseService(uid: widget.userid).getUserImage();
+    setState(() {
+    });
+  }
+
+  @override
+  void initState() {
+    getUserInfo();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: press,
+      onTap: (){
+         Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ChatScreen(username, myusername,imageURL)));
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal:20.0, vertical:15.0),
         child: Row(
@@ -24,18 +49,8 @@ class ChatCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundImage: AssetImage(chat.image),
+                backgroundImage:NetworkImage(imageURL),
               ),
-              if(chat.isActive)
-              Positioned(
-                right: 0,
-                bottom: 0,
-                child: Container(height: 16,
-                          width: 16,
-                          decoration: BoxDecoration(color:Colors.green,shape: BoxShape.circle,border: Border.all(color:Theme.of(context).scaffoldBackgroundColor,width: 3)),
-                          
-                ),
-              )
             ],
           ),
           Expanded(
@@ -44,12 +59,12 @@ class ChatCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                Text(chat.name,style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                Text(username,style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 SizedBox(height: 8),
                 Opacity(
                   opacity: 0.64,
-                  child: Text(chat.lastMessage,maxLines: 1,overflow: TextOverflow.ellipsis),
+                  child: Text(widget.lastMessage,maxLines: 1,overflow: TextOverflow.ellipsis),
                   ),
               ],
               ),
@@ -57,7 +72,7 @@ class ChatCard extends StatelessWidget {
             ),
             Opacity(
               opacity: 0.64,
-              child: Text(chat.time),
+              child: Text(widget.lastMessageTS),
               )
         ],
       ),

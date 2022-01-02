@@ -111,4 +111,26 @@ CollectionReference user = FirebaseFirestore.instance.collection('user');
 
   }
 
+  Future<String> getUserName()async{
+    String username = "";
+    var docsnapshot = await user.doc(uid).get();
+    if(docsnapshot.exists){
+      Map<String,dynamic>?data = docsnapshot.data();
+      username = data?["name"];
+    }
+    return username;
+  }
+
+
+
+Future<String> getUserImage()async{
+  String imageurl = "";
+  var docsnapshot = await user.doc(uid).get();
+  if(docsnapshot.exists){
+      Map<String,dynamic>?data = docsnapshot.data();
+      imageurl = data?["url"];
+    }
+    return imageurl;
+  }
+  
 }
