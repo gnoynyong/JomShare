@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:jomshare/constants.dart';
 import 'package:jomshare/services/userdatabase.dart';
 import 'package:random_string/random_string.dart';
+import 'package:intl/intl.dart';
 
 class ChatScreen extends StatefulWidget {
   final String chatWithUsername, myname;
@@ -68,7 +69,7 @@ class _ChatScreenState extends State<ChatScreen> {
       Map<String,dynamic> messageMap = {
         "message":message,
         "sendBy":myUsername,
-        "ts":lastMessageTS,       
+        "ts":lastMessageTS,
       };
 
       if(messageID==""){
@@ -82,44 +83,72 @@ class _ChatScreenState extends State<ChatScreen> {
                 "lastMessageSendBy":myUsername
               };
               updateLastMessage(chatroomID, lastMessageMap);
-              
+
                 messageController.text="";
                 messageID="";
-              
+
       });
-      
+
     }
   }
 
-   Widget chatMessageTile(String message, bool sendByMe) {
-    return Row(
-      mainAxisAlignment:
-          sendByMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+   Widget chatMessageTile(String message, bool sendByMe,Timestamp timestampx) {
+     var dateFormat = DateFormat("dd-MM-yyyy hh:mm aa");
+      var utcDate = dateFormat.format(DateTime.parse(timestampx.toDate().toString()));
+
+    double left,right;
+    if (sendByMe)
+    {
+      left=0;
+      right=15;
+    }
+    else
+    {
+      left=15;
+      right=0;
+
+    }
+    return Column(
+
       children: [
-        Flexible(
-          child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  bottomRight:
-                      sendByMe ? Radius.circular(0) : Radius.circular(24),
-                  topRight: Radius.circular(24),
-                  bottomLeft:
-                      sendByMe ? Radius.circular(24) : Radius.circular(0),
-                ),
-                color: sendByMe ? Colors.blue : Colors.white,
-              ),
-              padding: EdgeInsets.all(16),
-              child: Text(
-                message,
-                style: sendByMe?TextStyle(color: Colors.white):TextStyle(color: Colors.black),
-              )),
+        Row(
+          mainAxisAlignment:
+              sendByMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+          children: [
+            Flexible(
+              child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      bottomRight:
+                          sendByMe ? Radius.circular(0) : Radius.circular(24),
+                      topRight: Radius.circular(24),
+                      bottomLeft:
+                          sendByMe ? Radius.circular(24) : Radius.circular(0),
+                    ),
+                    color: sendByMe ? Colors.blue : Colors.white,
+                  ),
+                  padding: EdgeInsets.all(16),
+                  child: Text(
+                    message,
+                    style: sendByMe?TextStyle(color: Colors.white):TextStyle(color: Colors.black),
+                  )),
+            ),
+          ],
         ),
+        Container(
+          padding: EdgeInsets.fromLTRB(left, 5, right, 5),
+          alignment: sendByMe?Alignment.bottomRight:Alignment.bottomLeft,
+          child: Text(
+                      utcDate,
+                      style: sendByMe?TextStyle(color: Colors.white):TextStyle(color: Colors.white),
+                    ),
+        )
       ],
     );
   }
-  
+
   Widget chatMessages() {
     return StreamBuilder<QuerySnapshot>(
       stream: messageStream,
@@ -132,9 +161,85 @@ class _ChatScreenState extends State<ChatScreen> {
                 itemBuilder: (context, index) {
                   DocumentSnapshot ds = snapshot.data!.docs[index];
                   return chatMessageTile(
-                      ds["message"], myUsername == ds["sendBy"]);
+                      ds["message"], myUsername == ds["sendBy"],ds["ts"]);
                 })
-            : Center(child: CircularProgressIndicator());
+
+          // StickyGroupedListView<QueryDocumentSnapshot,DateTime>(
+          //   floatingHeader: true,
+          //     elements: snapshot.data!.docs,
+          //     order:StickyGroupedListOrder.ASC,
+
+          //     groupBy: (element)
+          //     {
+          //       Timestamp timestampdatetime=element.data()["ts"];
+          //       DateTime time=timestampdatetime.toDate();
+          //       return time;
+          //     },
+          //     groupComparator:(DateTime value1, DateTime value2)
+          //     {
+          //       return value2.compareTo(value1);
+
+          //     },
+          //     itemComparator: ( element1, element2)
+          //     {
+          //       Timestamp t1=element1.data()["ts"];
+          //       Timestamp t2=element2.data()["ts"];
+          //      return t1.toDate().compareTo(t2.toDate());
+
+          //     },
+          //     groupSeparatorBuilder: (element)
+          //     {
+          //       Timestamp ts=element.data()["ts"];
+          //       return Container(
+          //         height: 50,
+          //         child: Align(
+          //           alignment: Alignment.center,
+          //           child: Container(
+          //             width: 120,
+          //             decoration: BoxDecoration(
+          //               color: Colors.blue[300],
+          //               border: Border.all(
+          //           color: Colors.white,
+          //         ),
+          //         borderRadius: BorderRadius.all(Radius.circular(20.0)),
+
+          //             ),
+          //             child: Padding(
+
+          //               padding: const EdgeInsets.all(8.0),
+          //               child: Text(
+          //                 '${ DateFormat("dd-mm-yy").format(ts.toDate())}',
+          //                 textAlign: TextAlign.center,
+          //               )
+
+          //             ),
+
+
+
+          //           )
+
+
+          //         ),
+
+
+
+          //       );
+          //     },
+          //     itemBuilder: (context, element) {
+          //       return chatMessageTile(element.data()["message"], myUsername==element.data()["sendBy"], element.data()["ts"]);
+
+          //     },
+
+
+
+
+
+          // )
+
+
+
+
+           : Center(child: CircularProgressIndicator());
       },
     );
   }
@@ -216,7 +321,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 )
                           ],
                         ),
-                      ) 
+                      )
                       )
                   ],
                 ),
