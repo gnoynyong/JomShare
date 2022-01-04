@@ -15,7 +15,7 @@ class _ChatPageState extends State<ChatPage> {
   //get chatrooms list from db
  Stream<QuerySnapshot>? chatroomStream;
 
-  Future<Stream<QuerySnapshot>> getChatRooms() async{ 
+  Future<Stream<QuerySnapshot>> getChatRooms() async{
     return FirebaseFirestore.instance
         .collection("Chatroom")
         .orderBy("lastMessageSendTS", descending: true)
@@ -32,13 +32,30 @@ class _ChatPageState extends State<ChatPage> {
     getChatroomStream();
     super.initState();
   }
-  
+
   Widget chatroomlist(){
+
     return StreamBuilder<QuerySnapshot>(
               stream: chatroomStream,
               builder: (context,AsyncSnapshot<QuerySnapshot> snapshot){
-                return snapshot.hasData
-                ?ListView.builder(
+                if (snapshot.hasData)
+                {
+                  int count=0;
+                  snapshot.data!.docs.forEach((element) async{
+                    if (element.data()["users"][0]==FirebaseAuth.instance.currentUser!.uid||element.data()["users"][1]==FirebaseAuth.instance.currentUser!.uid)
+                    {
+                      count++;
+
+                    }
+
+                  });
+                  if (count==0)
+                  {
+                    return Center(child: Text('Your chat is silent. Time to break silence',style: TextStyle(fontSize: 20),),);
+                  }
+                  else
+                  {
+                    return ListView.builder(
                 itemCount: snapshot.data!.docs.length,
                 shrinkWrap: true,
                 itemBuilder: (context, index) {
@@ -48,6 +65,7 @@ class _ChatPageState extends State<ChatPage> {
                   if(ds["users"][0]==FirebaseAuth.instance.currentUser!.uid){
                     userid = ds["users"][1];
                     print(userid);
+
                   }
                   else{
                     userid = ds["users"][0];
@@ -56,8 +74,20 @@ class _ChatPageState extends State<ChatPage> {
                   DateTime dt = ds["lastMessageSendTS"].toDate();
                   String time = DateFormat('hh:mm a').format(dt);
                   return ChatCard(ds["lastMessage"],time, userid);
-                })
-                :Center(child: CircularProgressIndicator());
+                });
+                  }
+
+                }
+                else
+                {
+                  return  Center(child:
+                 CircularProgressIndicator()
+
+
+                 );
+                }
+
+
               },
             );
   }
@@ -69,11 +99,7 @@ class _ChatPageState extends State<ChatPage> {
         title:Text("Chats"),
         backgroundColor: darkblue,
       ),
-      body: Column(
-        children: [
-          chatroomlist()
-        ],
-        ),
+      body:  chatroomlist()
     );
   }
 }
