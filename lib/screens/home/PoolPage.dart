@@ -9,7 +9,6 @@ import 'package:jomshare/components/smallroundbutton.dart';
 import 'package:jomshare/constants.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:jomshare/screens/findpool/FindCarpool.dart';
-import 'package:jomshare/screens/offerpool/OfferCarPool.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:address_search_field/address_search_field.dart';
@@ -475,7 +474,7 @@ class _PoolpageState extends State<Poolpage> {
                           icon: Icon(Icons.directions_car),
                         ),
                         hint: Text('Car type'),
-                        items: <String>['HatchBack', 'Sedan', 'SUV', '4×4']
+                        items: <String>['HatchBack', 'Sedan', 'SUV', '4×4','MPV']
                             .map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,

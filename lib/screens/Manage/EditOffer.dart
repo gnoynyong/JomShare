@@ -402,7 +402,7 @@ TextEditingController location=TextEditingController();
                         flex: 2,
                         child: DropdownButtonFormField<String>(
                           hint: Text('Car type'),
-                          items: <String>['HatchBack', 'Sedan','SUV', '4×4'].map((String value) {
+                          items: <String>['HatchBack', 'Sedan','SUV', '4×4','MPV'].map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
                               child: new Text(value),
