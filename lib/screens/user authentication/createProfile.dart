@@ -6,6 +6,8 @@ import 'package:jomshare/constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jomshare/screens/user%20authentication/license.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+import 'package:intl/intl.dart';
 class createProfile extends StatefulWidget {
 
 
@@ -25,6 +27,8 @@ class _createProfileState extends State<createProfile> {
     final TextEditingController _phone = TextEditingController();
      final TextEditingController _address = TextEditingController();
       final TextEditingController _occupation = TextEditingController();
+       final TextEditingController _dob = TextEditingController();
+      final format = DateFormat("yyyy-MM-dd");
 bool ?L1,L2,L3,L4,L5;
 
 String ?_gender='Male';
@@ -175,33 +179,25 @@ String ?validate (String ?value)
             ),
           ),
            SizedBox(height: 10,),
-          TextFormField(
-            controller: _age,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            keyboardType: TextInputType.numberWithOptions(
-              decimal: false,
-              signed: false,
-
-            ),
-            validator: (value){
-              if (value!.isEmpty)
+           DateTimeField(
+             validator: (value) {
+                if (value==null)
               {
-                return "Age cannot be empty";
+                return "Date of Birth cannot be empty";
               }
-              if (int.parse(value)<=5||int.parse(value)>120)
-              {
-                return "Invalid age. Max age: 120 & Min age:5";
-              }
-            },
+             },
+             controller: _dob,
+             format: format,
+             decoration: InputDecoration(
 
-            decoration: InputDecoration(
-              filled: true,
+                          hintText: 'Date Of Birth',
+                          filled: true,
 
               fillColor: Colors.white,
               hintStyle: TextStyle(
                 color: Colors.grey
               ),
-              hintText: 'Age',
+
               prefixIcon: Icon(Icons.cake
               ,size: 30,color: Colors.black),
               focusedBorder:OutlineInputBorder(
@@ -217,10 +213,66 @@ String ?validate (String ?value)
 
                             borderSide:BorderSide(color: Colors.red,width: 1)
                           )
-            ),
+                        ),
 
-          ),
+             onShowPicker: (context, currentValue) async
+             {
+               return await showDatePicker(
+                              context: context,
+                              firstDate: DateTime(1900),
+                              initialDate: currentValue ?? DateTime.now(),
+                              lastDate: DateTime(2100));
 
+             }
+
+
+             )
+          // TextFormField(
+          //   controller: _age,
+          //   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          //   keyboardType: TextInputType.numberWithOptions(
+          //     decimal: false,
+          //     signed: false,
+
+          //   ),
+          //   validator: (value){
+          //     if (value!.isEmpty)
+          //     {
+          //       return "Age cannot be empty";
+          //     }
+          //     if (int.parse(value)<=5||int.parse(value)>120)
+          //     {
+          //       return "Invalid age. Max age: 120 & Min age:5";
+          //     }
+          //   },
+
+          //   decoration: InputDecoration(
+          //     filled: true,
+
+          //     fillColor: Colors.white,
+          //     hintStyle: TextStyle(
+          //       color: Colors.grey
+          //     ),
+          //     hintText: 'Age',
+          //     prefixIcon: Icon(Icons.cake
+          //     ,size: 30,color: Colors.black),
+          //     focusedBorder:OutlineInputBorder(
+
+
+          //                   borderSide:BorderSide(color: Colors.blue,width: 1)
+          //                 ),
+          //                 enabledBorder:OutlineInputBorder(
+
+          //                   borderSide:BorderSide(color: Colors.blue,width: 1)
+          //                 ),
+          //                 errorBorder: OutlineInputBorder(
+
+          //                   borderSide:BorderSide(color: Colors.red,width: 1)
+          //                 )
+          //   ),
+
+          // ),
+,
           SizedBox(height: 10,),
           TextFormField(
             controller: _phone,
@@ -345,10 +397,16 @@ String ?validate (String ?value)
                           {
 if(_profileform.currentState!.validate())
                           {
+                            String dob=_dob.text;
+                            var days=DateTime.now().difference(DateTime.parse(dob)).inDays;
+                            double age = days/ 365;
+
+                            print("Age: "+age.round().toString());
+
 
                               Navigator.pushNamed(context, '/drivingProfile'
                               ,arguments: {'email':arguments['email'],'pass':arguments['pass']
-                              ,'name':_name.text,'ic':_icno.text,'gender':_gender,'age':_age.text
+                              ,'name':_name.text,'ic':_icno.text,'gender':_gender,'age':age.round().toString()
                               ,'phone':_phone.text,'address':_address.text,'occupation':_occupation.text
                               ,'picture':_selectedFile});
                           }
