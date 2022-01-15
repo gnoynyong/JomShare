@@ -29,11 +29,28 @@ class _ViewRequestState extends State<ViewRequest> {
   CollectionReference carpooldb =
       FirebaseFirestore.instance.collection('carpool');
   Future <void> cancelCarpool() async {
-    FirebaseFirestore.instance.collection("user").doc(FirebaseAuth.instance.currentUser!.uid).update(
+    DocumentSnapshot userData=await FirebaseFirestore.instance.collection("user").doc(FirebaseAuth.instance.currentUser!.uid).get();
+    if (userData.data()!.containsKey("Requested carpools"))
+    {
+        List requestedcarpool=userData.data()!["Requested carpools"];
+        if (requestedcarpool.length<=1)
+        {
+          FirebaseFirestore.instance.collection("user").doc(FirebaseAuth.instance.currentUser!.uid).update(
+      {
+        'Requested carpools': FieldValue.delete()
+      }
+    );
+        }
+        else
+        {
+          FirebaseFirestore.instance.collection("user").doc(FirebaseAuth.instance.currentUser!.uid).update(
       {
         'Requested carpools': FieldValue.arrayRemove([widget.vrequest.pooldocid])
       }
     );
+
+        }
+    }
    DocumentSnapshot x= await carpooldb.doc(widget.vrequest.pooldocid).get();
    List requestorID=x.data()!["requestList"];
    List requestorStatus=x.data()!["requestStatus"];
