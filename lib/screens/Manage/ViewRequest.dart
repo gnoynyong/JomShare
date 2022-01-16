@@ -73,7 +73,7 @@ class _ViewRequestState extends State<ViewRequest> {
     );
     carpooldb.doc(widget.vrequest.pooldocid).set(
       {
-        "requestStatus": FieldValue.arrayUnion(requestorStatus),
+        "requestStatus": requestorStatus,
 
       },SetOptions(merge: true)
     );
